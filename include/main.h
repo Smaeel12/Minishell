@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/04/29 01:03:37 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/13 12:43:54 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,12 +29,28 @@
 
 #include <errno.h>
 
-#include "libft/libft.h"
+#include "../libft/libft.h"
 
-typedef char *t_cmd;
-typedef char *t_path;
+#include <limits.h>
 
-#define CMD_NF ": command not found\n"
-#define PERM_IN ": Permission denied\n"
+// typedef char *t_cmd;
+// typedef char *t_path;
+
+// #define CMD_NF ": command not found\n"
+// #define PERM_IN ": Permission denied\n"
+
+// typedef enum e_token_state
+// {
+// 	NORMAL,
+// 	WORD,
+// 	PIPE = '|',
+// 	BACKGROUND = '&',
+// 	REDIRECT_IN = '<',
+// 	REDIRECT_OUT = '>',
+// 	DOUBLE_QUOTE = '"',
+// 	SINGLE_QUOTE = '\'',
+// 	OPEN_PARENTHESIS = '(',
+// 	CLOSE_PARENTHESIS = ')',
+// } t_token_state;
 
 #endif

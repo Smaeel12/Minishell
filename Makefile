@@ -1,16 +1,16 @@
 NAME = minishell
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g3 #-fsanitize=address
-SRCS = main.c
-OBJS = $(addprefix objs/, $(SRCS:.c=.o))
-HEADER = main.h
+SRCS = $(addprefix src/, main.c)
+OBJS = $(addprefix objs/, $(SRCS:src/%.c=%.o))
+INCLUDE = include/main.h
 
 all: $(NAME)
 
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) -Llibft -lft -lreadline -ltermcap
 
-objs/%.o: %.c $(HEADER)
+objs/%.o: src/%.c $(INCLUDE)
 	@mkdir -p objs/
 	$(CC) $(CFLAGS) -c $< -o $@
 
