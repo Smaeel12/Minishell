@@ -6,18 +6,18 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/13 12:43:54 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/16 10:02:51 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <stdlib.h>
-
 #include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
+
+#include <stdlib.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -39,18 +39,29 @@
 // #define CMD_NF ": command not found\n"
 // #define PERM_IN ": Permission denied\n"
 
-// typedef enum e_token_state
-// {
-// 	NORMAL,
-// 	WORD,
-// 	PIPE = '|',
-// 	BACKGROUND = '&',
-// 	REDIRECT_IN = '<',
-// 	REDIRECT_OUT = '>',
-// 	DOUBLE_QUOTE = '"',
-// 	SINGLE_QUOTE = '\'',
-// 	OPEN_PARENTHESIS = '(',
-// 	CLOSE_PARENTHESIS = ')',
-// } t_token_state;
+#define VALID_TOKENS "<>()\"'*|"
+
+enum e_type
+{
+    SCAN,
+    WORD,
+    PIPE = '|',
+    INRDR = '<',
+    ANDOP = '&',
+    INDQTS = '"',
+    OUTRDR = '>',
+    INSQTS = '\'',
+    ASETRIC = '*',
+    OPARENTHSIS = '(',
+    CPARENTHSIS = ')',
+};
+
+typedef struct s_token
+{
+    char *value;
+    enum e_type type;
+} t_token;
+
+t_token *tokenizer(char *line);
 
 #endif
