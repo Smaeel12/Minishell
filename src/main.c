@@ -20,29 +20,6 @@ int print_token(char *line, size_t start, size_t end)
 	return (0);
 }
 
-#define VALID_TOKENS "<>()\"'*|"
-
-enum e_tokentype
-{
-	SCAN,
-	WORD,
-	INRDR = '<',
-	OUTRDR = '>',
-	INSQTS = '\'',
-	INDQTS = '"',
-	OPEN_PARENT = '(',
-	CLOSE_PARENT = ')',
-};
-
-enum e_tokentype advance(char c)
-{
-	if (ft_strchr(VALID_TOKENS, c))
-		return c;
-	if (c && c != ' ')
-		return WORD;
-	return SCAN;
-}
-
 // void tokenizer(char *line, t_list **tokens, enum e_tokentype *state)
 // {
 // 	enum e_tokentype cstate;
@@ -88,57 +65,113 @@ enum e_tokentype advance(char c)
 // 	ft_lstclear(&tokens, free);
 // }
 
-static char *st_line;
+#define VALID_TOKENS "<>()\"'*|"
+
+enum e_type
+{
+	SCAN,
+	WORD,
+	PIPE = '|',
+	INRDR = '<',
+	ANDOP = '&',
+	INDQTS = '"',
+	OUTRDR = '>',
+	INSQTS = '\'',
+	ASETRIC = '*',
+	OPARENTHSIS = '(',
+	CPARENTHSIS = ')',
+};
 
 typedef struct s_token
 {
 	char *value;
-	enum e_tokentype type;
+	enum e_type type;
 } t_token;
 
-t_token *ft_strtok_a()
+enum e_type advance(char c)
 {
-	enum e_tokentype cstate;
-	enum e_tokentype state;
+	if (ft_strchr(VALID_TOKENS, c))
+		return c;
+	if (c && c != ' ')
+		return WORD;
+	return SCAN;
+}
+
+t_token *ft_strtok_s(char *line)
+{
+	static char *st_line;
+	enum e_type cstate;
+	enum e_type state;
 	t_token *token;
 	size_t i;
 
+	if (line)
+		st_line = line;
+	if (st_line == NULL || *st_line == '\0')
+		return NULL;
 	i = 0;
 	state = advance(st_line[i]);
+	token = (t_token *)malloc(sizeof(t_token));
 	while (st_line[i])
 	{
-		cstate = advance(st_line[i]);
-		if (state != cstate && state == SCAN)
+		if (state == SCAN)
 		{
-			state = cstate;
-			st_line = &st_line[i];
+			while (st_line[i] && st_line[i] == ' ')
+				st_line++;
 			i = 0;
+			state = advance(st_line[i]);
 		}
-		while ((state == INDQTS || state == INSQTS) && state != cstate && st_line[i])
-			cstate = advance(st_line[i++]);
-		if (state != cstate)
+		if (state == OPARENTHSIS || state == CPARENTHSIS)
 		{
-			token = (t_token *)malloc(sizeof(t_token));
+			token->value = ft_substr(st_line, 0, i + 1);
+			token->type = state;
+			st_line++;
+			return token;
+		}
+		if (state == INSQTS || state == INDQTS)
+		{
+			while (1)
+			{
+				cstate = advance(st_line[++i]);
+				if (state == cstate || !st_line[i])
+					break;
+			}
+			token->value = ft_substr(st_line, 0, i + 1);
+			token->type = state;
+			st_line = &st_line[i + 1];
+			return token;
+		}
+		if (state == WORD || state == PIPE || state == INRDR || state == OUTRDR || state == ANDOP)
+		{
+			while (1)
+			{
+				cstate = advance(st_line[++i]);
+				if (state != cstate || !st_line[i])
+					break;
+			}
 			token->value = ft_substr(st_line, 0, i);
 			token->type = state;
 			st_line = &st_line[i];
 			return token;
 		}
-		i++;
 	}
-	return NULL;
+	return (free(token), NULL);
 }
 
-int main()
+int main(int ac, char **av)
 {
-	char cmd[] = "< infile ((cmd \"arg seprated\" || cmd) && cmd > /dev/stdout > file) | cmd";
 	t_token *token;
 
-	st_line = cmd;
-	while ((token = ft_strtok_a()))
+	if (ac != 2)
+		return (0);
+	token = ft_strtok_s(av[1]);
+	while (1)
 	{
-		printf("%s %#x\n", token->value, token->type);
+		if (!token)
+			break;
+		printf("type: %#x || value: %s\n", token->type, token->value);
 		free(token->value);
 		free(token);
+		token = ft_strtok_s(NULL);
 	}
 }
