@@ -1,14 +1,16 @@
 # Minishell
 
-GRAMMAR::
-<command-line> ::= "(" <command-line> ")" | <command>
-<command> ::= <simple_command> (<operator> <simple_command>)*
-<operator> ::= "|" | ";" | "&&" | "||"
-<simple_command> ::= <redirection>* <word> <word>* <redirection>*
-<redirection> ::= ">" <file> | ">>" <file> | "<" <file> | "2>" <file> | "2>>" <file>
-<word> ::= "$" <identifier> | <identifier> | "*" | "$?"
-<identifier> ::= [a-zA-Z_-\s][a-zA-Z0-9_-\s]* | "<identifier>" | '<identifier>'
-<file> ::= <word>
+```
+  GRAMMAR::
+  <command-line> ::= "(" <command-line> ")" | <command>
+  <command> ::= <simple_command> (<operator> <simple_command>)*
+  <operator> ::= "|" | ";" | "&&" | "||"
+  <simple_command> ::= <redirection>* <word> <word>* <redirection>*
+  <redirection> ::= ">" <file> | ">>" <file> | "<" <file> | "2>" <file> | "2>>" <file>
+  <word> ::= "$" <identifier> | <identifier> | "*" | "$?"
+  <identifier> ::= [a-zA-Z_-\s][a-zA-Z0-9_-\s]* | "<identifier>" | '<identifier>'
+  <file> ::= <word>
+```
 
 # To-Do List for Creating a Shell Parser
 

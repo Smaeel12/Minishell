@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/16 10:02:51 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/18 09:10:26 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,18 +33,15 @@
 
 #include <limits.h>
 
-// typedef char *t_cmd;
-// typedef char *t_path;
-
-// #define CMD_NF ": command not found\n"
-// #define PERM_IN ": Permission denied\n"
-
+/** TOKNIZER **/
 #define VALID_TOKENS "<>()\"'*|"
 
 enum e_type
 {
     SCAN,
     WORD,
+    IOFILE,
+    COMMAND,
     PIPE = '|',
     INRDR = '<',
     ANDOP = '&',
@@ -63,5 +60,22 @@ typedef struct s_token
 } t_token;
 
 t_token *tokenizer(char *line);
+
+/** PARSER **/
+#define MAX_ARGS 128
+
+typedef struct s_node
+{
+    enum e_type type;
+    union
+    {
+        char *command[MAX_ARGS];
+        char *value;
+    } u_data;
+    struct s_node *left;
+    struct s_node *right;
+} t_node;
+
+t_node *parse_command(char *line);
 
 #endif
