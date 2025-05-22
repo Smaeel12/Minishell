@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/18 09:10:26 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/22 09:39:01 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,21 +34,18 @@
 #include <limits.h>
 
 /** TOKNIZER **/
-#define VALID_TOKENS "<>()\"'*|"
+#define VALID_TOKENS "<>()\"'|"
 
-enum e_type
+enum e_TOKENType
 {
     SCAN,
     WORD,
-    IOFILE,
-    COMMAND,
     PIPE = '|',
     INRDR = '<',
     ANDOP = '&',
     INDQTS = '"',
     OUTRDR = '>',
     INSQTS = '\'',
-    ASETRIC = '*',
     OPARENTHSIS = '(',
     CPARENTHSIS = ')',
 };
@@ -56,26 +53,54 @@ enum e_type
 typedef struct s_token
 {
     char *value;
-    enum e_type type;
+    enum e_TOKENType type;
 } t_token;
 
-t_token *tokenizer(char *line);
+void tokenizer(char *line, t_list **lst);
+static inline enum e_TOKENType advance(char c)
+{
+    if (ft_strchr(VALID_TOKENS, c))
+        return (c);
+    if (c && c != ' ')
+        return (WORD);
+    return (SCAN);
+}
 
 /** PARSER **/
 #define MAX_ARGS 128
+#define MAX_REDIRECTIONS 80
 
-typedef struct s_node
+enum ASTNodeType
 {
-    enum e_type type;
+    NODE_COMMAND_LINE,
+    NODE_COMMAND,
+    NODE_OPERATOR,
+    NODE_SIMPLE_COMMAND,
+    NODE_REDIRECTION,
+    NODE_WORD,
+    NODE_IDENTIFIER,
+    NODE_FILE
+};
+
+typedef struct s_ASTNode
+{
+    enum ASTNodeType type;
     union
     {
-        char *command[MAX_ARGS];
-        char *value;
-    } u_data;
-    struct s_node *left;
-    struct s_node *right;
-} t_node;
-
-t_node *parse_command(char *line);
+        struct
+        {
+            char *value;
+            struct s_node *left;
+            struct s_node *right;
+        } operator;
+        struct
+        {
+            char *args[MAX_ARGS];
+            char *redirections[MAX_REDIRECTIONS];
+        } command;
+    };
+} t_ASTNode;
+t_ASTNode *parse_command(t_list **tokens);
+t_ASTNode *parse_redirection(t_list **tokens);
 
 #endif
