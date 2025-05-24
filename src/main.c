@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/22 09:25:28 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/22 14:12:44 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,15 +31,18 @@ void print_tree(t_ASTNode *node)
 		return;
 	if (node->type == NODE_COMMAND)
 	{
+		printf("arguments: ");
+		for (size_t i = 0; node->command.arguments[i]; i++)
+			printf("%s ", node->command.arguments[i]);
+		printf("\n");
 		printf("redirections: ");
 		for (size_t i = 0; node->command.redirections[i]; i++)
 			printf("%s ", node->command.redirections[i]);
 		printf("\n");
-		printf("values: ");
-		for (size_t i = 0; node->command.args[i]; i++)
-			printf("%s ", node->command.args[i]);
-		printf("\n");
+		return;
 	}
+	print_tree(node->operator.left);
+	print_tree(node->operator.right);
 	free(node);
 }
 
@@ -53,7 +56,11 @@ int main(int ac, char **av)
 		return 0;
 	tokenizer(av[1], &tokens);
 	temp = tokens;
-	node = parse_command(&temp);
+	node = parse_pipeline(&temp);
+	if (node == NULL)
+	{
+		printf("bash: syntax error near unexpected token `%.2s'\n", (((t_token *)temp->content)->value));
+	}
 	print_tree(node);
 	// ft_lstiter(tokens, ft_puts);
 	ft_lstclear(&tokens, free_token);

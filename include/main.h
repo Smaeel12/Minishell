@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/22 09:39:01 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/23 14:03:03 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,14 +72,8 @@ static inline enum e_TOKENType advance(char c)
 
 enum ASTNodeType
 {
-    NODE_COMMAND_LINE,
     NODE_COMMAND,
     NODE_OPERATOR,
-    NODE_SIMPLE_COMMAND,
-    NODE_REDIRECTION,
-    NODE_WORD,
-    NODE_IDENTIFIER,
-    NODE_FILE
 };
 
 typedef struct s_ASTNode
@@ -90,17 +84,21 @@ typedef struct s_ASTNode
         struct
         {
             char *value;
-            struct s_node *left;
-            struct s_node *right;
+            struct s_ASTNode *left;
+            struct s_ASTNode *right;
         } operator;
         struct
         {
-            char *args[MAX_ARGS];
+            char *arguments[MAX_ARGS];
             char *redirections[MAX_REDIRECTIONS];
+            size_t ridx;
+            size_t aidx;
         } command;
     };
 } t_ASTNode;
+
 t_ASTNode *parse_command(t_list **tokens);
 t_ASTNode *parse_redirection(t_list **tokens);
+t_ASTNode *parse_pipeline(t_list **tokens);
 
 #endif
