@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/22 14:12:44 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/25 15:40:34 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,7 +25,7 @@ void free_token(void *arg)
 	free(token);
 }
 
-void print_tree(t_ASTNode *node)
+void print_tree(t_tree *node)
 {
 	if (!node)
 		return;
@@ -50,11 +50,13 @@ int main(int ac, char **av)
 {
 	t_list *tokens = NULL;
 	t_list *temp = NULL;
-	t_ASTNode *node;
+	t_tree *node;
 
 	if (ac != 2)
 		return 0;
-	tokenizer(av[1], &tokens);
+	enum e_errors tokenizer_err = tokenizer(av[1], &tokens);
+	if (tokenizer_err != OK)
+		return (printf("Unbalenced Quotes\n"), 0);
 	temp = tokens;
 	node = parse_pipeline(&temp);
 	if (node == NULL)

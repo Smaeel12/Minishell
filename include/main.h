@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/23 14:03:03 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/25 15:40:04 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -35,57 +35,43 @@
 
 /** TOKNIZER **/
 #define VALID_TOKENS "<>()\"'|"
-
-enum e_TOKENType
+enum e_token_type
 {
     SCAN,
     WORD,
+    DQTS = '"',
     PIPE = '|',
+    SQTS = '\'',
     INRDR = '<',
     ANDOP = '&',
-    INDQTS = '"',
     OUTRDR = '>',
-    INSQTS = '\'',
     OPARENTHSIS = '(',
     CPARENTHSIS = ')',
 };
-
 typedef struct s_token
 {
     char *value;
-    enum e_TOKENType type;
+    enum e_token_type type;
 } t_token;
-
-void tokenizer(char *line, t_list **lst);
-static inline enum e_TOKENType advance(char c)
-{
-    if (ft_strchr(VALID_TOKENS, c))
-        return (c);
-    if (c && c != ' ')
-        return (WORD);
-    return (SCAN);
-}
 
 /** PARSER **/
 #define MAX_ARGS 128
 #define MAX_REDIRECTIONS 80
-
-enum ASTNodeType
+enum e_node_type
 {
     NODE_COMMAND,
     NODE_OPERATOR,
 };
-
-typedef struct s_ASTNode
+typedef struct s_tree
 {
-    enum ASTNodeType type;
+    enum e_node_type type;
     union
     {
         struct
         {
             char *value;
-            struct s_ASTNode *left;
-            struct s_ASTNode *right;
+            struct s_tree *left;
+            struct s_tree *right;
         } operator;
         struct
         {
@@ -95,10 +81,37 @@ typedef struct s_ASTNode
             size_t aidx;
         } command;
     };
-} t_ASTNode;
+} t_tree;
 
-t_ASTNode *parse_command(t_list **tokens);
-t_ASTNode *parse_redirection(t_list **tokens);
-t_ASTNode *parse_pipeline(t_list **tokens);
+/** TOKENIZATION FUNCTIONS */
+enum e_errors tokenizer(char *line, t_list **lst);
+static inline enum e_token_type advance(char c)
+{
+    if (ft_strchr(VALID_TOKENS, c))
+        return (c);
+    if (c && c != ' ')
+        return (WORD);
+    return (SCAN);
+}
+
+int last_status;
+
+/** PARSING FUNCTIONS */
+t_tree *parse_command(t_list **tokens);
+t_tree *parse_redirection(t_list **tokens);
+t_tree *parse_pipeline(t_list **tokens);
+
+/** PARSER_HELPER_FUNCTIONS */
+void clear_tree(t_tree *tree);
+int is_word(t_token *token, size_t last_status);
+char *expand_line(char *line, size_t last_status);
+t_token *create_token(enum e_token_type type, char *line, size_t len);
+
+enum e_errors
+{
+    OK,
+    DQTS_ERR = '"',
+    SQTS_ERR = '\'',
+};
 
 #endif

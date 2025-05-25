@@ -66,7 +66,7 @@ char *ft_shell_expand(char *line, size_t lstatus)
         if (key[0] == '?')
             value = ft_itoa(lstatus);
         result = expand_line(result, line, value);
-        line = &line[i];
+        line = &line[i + (line[i] == '?')];
         free(key);
     }
     return (result);

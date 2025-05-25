@@ -1,7 +1,7 @@
 NAME = minishell
 CC = cc
 CFLAGS = -Wall -Wextra -Werror -g3 #-fsanitize=address
-SRCS = $(addprefix src/, main.c parser.c)
+SRCS = $(addprefix src/, parser.c parser_helpers.c main.c)
 OBJS = $(addprefix objs/, $(SRCS:src/%.c=%.o))
 INCLUDE = include/main.h
 
