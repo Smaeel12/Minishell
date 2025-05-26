@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/25 15:38:10 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/26 09:43:49 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -90,20 +90,4 @@ char *expand_line(char *line, size_t last_status)
         free(key);
     }
     return (result);
-}
-
-int is_word(t_token *token, size_t last_status)
-{
-    char *new_string;
-
-    if (token->type != SQTS && token->type != DQTS && token->type != WORD)
-        return (0);
-    if (token->type == DQTS || token->type == WORD)
-    {
-        new_string = expand_line(token->value, last_status);
-        free(token->value);
-        token->value = new_string;
-    }
-    token->type = WORD;
-    return (1);
 }

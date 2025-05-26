@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/25 15:40:34 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/26 09:21:04 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,14 +31,12 @@ void print_tree(t_tree *node)
 		return;
 	if (node->type == NODE_COMMAND)
 	{
-		printf("arguments: ");
+		printf("arguments:\n");
 		for (size_t i = 0; node->command.arguments[i]; i++)
-			printf("%s ", node->command.arguments[i]);
-		printf("\n");
-		printf("redirections: ");
+			printf("\t%li: %s\n", i, node->command.arguments[i]);
+		printf("redirections:\n");
 		for (size_t i = 0; node->command.redirections[i]; i++)
-			printf("%s ", node->command.redirections[i]);
-		printf("\n");
+			printf("\t%li: %s\n", i, node->command.redirections[i]);
 		return;
 	}
 	print_tree(node->operator.left);
@@ -50,20 +48,20 @@ int main(int ac, char **av)
 {
 	t_list *tokens = NULL;
 	t_list *temp = NULL;
-	t_tree *node;
+	t_tree *tree;
 
 	if (ac != 2)
 		return 0;
 	enum e_errors tokenizer_err = tokenizer(av[1], &tokens);
 	if (tokenizer_err != OK)
 		return (printf("Unbalenced Quotes\n"), 0);
-	temp = tokens;
-	node = parse_pipeline(&temp);
-	if (node == NULL)
-	{
-		printf("bash: syntax error near unexpected token `%.2s'\n", (((t_token *)temp->content)->value));
-	}
-	print_tree(node);
 	// ft_lstiter(tokens, ft_puts);
+
+	temp = tokens;
+	tree = parse_pipeline(&temp);
+	if (tree == NULL)
+		return (ft_lstclear(&tokens, free_token), 0);
+	print_tree(tree);
+	clear_tree(tree);
 	ft_lstclear(&tokens, free_token);
 }

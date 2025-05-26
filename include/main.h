@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/25 15:40:04 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/26 09:41:28 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,8 +110,11 @@ t_token *create_token(enum e_token_type type, char *line, size_t len);
 enum e_errors
 {
     OK,
-    DQTS_ERR = '"',
-    SQTS_ERR = '\'',
+    QTS_ERR,
 };
+
+#define INV_RDR_FILE "Invalid Redirection File the file should be a word"
+#define INV_RDR "Invalid Redirection"
+#define INV_PIPE "Incomplete/Invalid Pipe"
 
 #endif
