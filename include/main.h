@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/26 09:41:28 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/26 10:56:28 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -116,5 +116,13 @@ enum e_errors
 #define INV_RDR_FILE "Invalid Redirection File the file should be a word"
 #define INV_RDR "Invalid Redirection"
 #define INV_PIPE "Incomplete/Invalid Pipe"
+
+
+
+
+
+
+int execute_pipeline(t_tree *tree);
+
 
 #endif

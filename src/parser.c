@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/26 09:56:33 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/26 11:11:31 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,7 +56,7 @@ t_tree *parse_pipeline(t_list **tokens)
 		*tokens = (*tokens)->next;
 		right->operator.right = parse_command(tokens);
 		right->operator.left = left;
-		if (!left || right->operator.right == NULL || ft_strlen(right->operator.value))
+		if (!left || right->operator.right == NULL || ft_strlen(right->operator.value) > 2)
 			return ft_putendl_fd(INV_PIPE, 2), clear_tree(right), NULL;
 		left = right;
 	}
