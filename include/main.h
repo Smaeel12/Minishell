@@ -6,35 +6,39 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/26 10:56:28 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/27 14:23:56 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #ifndef MAIN_H
 #define MAIN_H
 
-#include <stdio.h>
+/** INCLUDES */
+
 #include <readline/readline.h>
 #include <readline/history.h>
-
-#include <stdlib.h>
-
-#include <unistd.h>
-#include <fcntl.h>
-
-#include <sys/wait.h>
+#include "../libft/libft.h"
 #include <sys/resource.h>
-
+#include <sys/wait.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <signal.h>
-
+#include <limits.h>
+#include <stdio.h>
+#include <fcntl.h>
 #include <errno.h>
 
-#include "../libft/libft.h"
+/** DEFINITIONS */
 
-#include <limits.h>
-
-/** TOKNIZER **/
+#define INV_RDR_FILE "Invalid Redirection File the file should be a word"
+#define INV_PIPE "Incomplete/Invalid Pipe"
+#define INV_RDR "Invalid Redirection"
 #define VALID_TOKENS "<>()\"'|"
+#define MAX_REDIRECTIONS 80
+#define MAX_ARGS 128
+
+/** ENUMS **/
+
 enum e_token_type
 {
     SCAN,
@@ -48,20 +52,24 @@ enum e_token_type
     OPARENTHSIS = '(',
     CPARENTHSIS = ')',
 };
-typedef struct s_token
-{
-    char *value;
-    enum e_token_type type;
-} t_token;
-
-/** PARSER **/
-#define MAX_ARGS 128
-#define MAX_REDIRECTIONS 80
 enum e_node_type
 {
     NODE_COMMAND,
     NODE_OPERATOR,
 };
+enum e_errors
+{
+    OK,
+    QTS_ERR,
+};
+
+/** STRUCTS */
+
+typedef struct s_token
+{
+    char *value;
+    enum e_token_type type;
+} t_token;
 typedef struct s_tree
 {
     enum e_node_type type;
@@ -77,14 +85,27 @@ typedef struct s_tree
         {
             char *arguments[MAX_ARGS];
             char *redirections[MAX_REDIRECTIONS];
-            size_t ridx;
-            size_t aidx;
         } command;
     };
 } t_tree;
 
-/** TOKENIZATION FUNCTIONS */
-enum e_errors tokenizer(char *line, t_list **lst);
+/** PROTOTYPES */
+
+enum e_errors tokenize_cmdline(t_list **lst, char *line);
+t_tree *parse_pipeline(t_list *tokens, size_t last_status);
+t_tree *parse_command(t_list **tokens, size_t last_status);
+
+t_token *create_token(enum e_token_type type, char *line, size_t len);
+char *expand_line(char *line, size_t last_status);
+void clear_tree(t_tree *tree);
+void clear_token(void *arg);
+
+char *create_line(char **strs, size_t nstrs);
+
+int execute_commands(t_tree *tree, char **paths, int *streams, int unused);
+
+/** INLINE FUNCS */
+
 static inline enum e_token_type advance(char c)
 {
     if (ft_strchr(VALID_TOKENS, c))
@@ -93,36 +114,5 @@ static inline enum e_token_type advance(char c)
         return (WORD);
     return (SCAN);
 }
-
-int last_status;
-
-/** PARSING FUNCTIONS */
-t_tree *parse_command(t_list **tokens);
-t_tree *parse_redirection(t_list **tokens);
-t_tree *parse_pipeline(t_list **tokens);
-
-/** PARSER_HELPER_FUNCTIONS */
-void clear_tree(t_tree *tree);
-int is_word(t_token *token, size_t last_status);
-char *expand_line(char *line, size_t last_status);
-t_token *create_token(enum e_token_type type, char *line, size_t len);
-
-enum e_errors
-{
-    OK,
-    QTS_ERR,
-};
-
-#define INV_RDR_FILE "Invalid Redirection File the file should be a word"
-#define INV_RDR "Invalid Redirection"
-#define INV_PIPE "Incomplete/Invalid Pipe"
-
-
-
-
-
-
-int execute_pipeline(t_tree *tree);
-
 
 #endif

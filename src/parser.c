@@ -6,13 +6,13 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/26 11:11:31 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/26 16:58:40 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-enum e_errors tokenizer(char *line, t_list **lst)
+enum e_errors tokenize_cmdline(t_list **lst, char *line)
 {
 	enum e_token_type cstate;
 	enum e_token_type state;
@@ -41,20 +41,20 @@ enum e_errors tokenizer(char *line, t_list **lst)
 	return (OK);
 }
 
-t_tree *parse_pipeline(t_list **tokens)
+t_tree *parse_pipeline(t_list *tokens, size_t last_status)
 {
 	t_tree *left;
 	t_tree *right;
 
-	left = parse_command(tokens);
-	while ((*tokens) && ((t_token *)(*tokens)->content)->type == PIPE)
+	left = parse_command(&tokens, last_status);
+	while (tokens && ((t_token *)tokens->content)->type == PIPE)
 	{
 		right = (t_tree *)malloc(sizeof(t_tree));
 		ft_bzero(right, sizeof(t_tree));
-		right->operator.value = ((t_token *)(*tokens)->content)->value;
+		right->operator.value = ((t_token *)tokens->content)->value;
 		right->type = NODE_OPERATOR;
-		*tokens = (*tokens)->next;
-		right->operator.right = parse_command(tokens);
+		tokens = tokens->next;
+		right->operator.right = parse_command(&tokens, last_status);
 		right->operator.left = left;
 		if (!left || right->operator.right == NULL || ft_strlen(right->operator.value) > 2)
 			return ft_putendl_fd(INV_PIPE, 2), clear_tree(right), NULL;
@@ -63,7 +63,7 @@ t_tree *parse_pipeline(t_list **tokens)
 	return (left);
 }
 
-t_tree *parse_command(t_list **tokens)
+t_tree *parse_command(t_list **tokens, size_t last_status)
 {
 	char *expanded_line;
 	t_token *token;

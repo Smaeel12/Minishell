@@ -1,16 +1,23 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   parser_helpers.c                                   :+:      :+:    :+:   */
+/*   parser_utils.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/26 09:43:49 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/27 14:24:46 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
+
+void clear_token(void *arg)
+{
+    t_token *token = arg;
+    free(token->value);
+    free(token);
+}
 
 void clear_tree(t_tree *tree)
 {
@@ -36,29 +43,39 @@ t_token *create_token(enum e_token_type type, char *line, size_t len)
     return (token);
 }
 
-char *create_line(char *origin, char *line, char *value)
+char *create_line(char **strs, size_t nstrs)
 {
-    size_t origin_len;
-    size_t value_len;
-    size_t line_len;
-    char *newline;
+    size_t total_len;
+    size_t offset;
+    size_t srclen;
+    char *result;
+    size_t i;
 
-    value_len = 0;
-    origin_len = 0;
-    line_len = ft_strlen(line);
-    if (value)
-        value_len = ft_strlen(value);
-    if (origin)
-        origin_len = ft_strlen(origin);
-    newline = (char *)malloc((line_len + value_len + origin_len + 1) * sizeof(char));
-    if (!newline)
+    i = 0;
+    offset = 0;
+    total_len = 0;
+    while (i < nstrs)
+    {
+        if (strs[i])
+            total_len += ft_strlen(strs[i]);
+        i++;
+    }
+    i = 0;
+    result = (char *)malloc((total_len + 1) * sizeof(char));
+    if (!result)
         return NULL;
-    if (origin)
-        ft_strlcpy(newline, origin, origin_len + 1);
-    ft_strlcpy(newline + origin_len, line, line_len + 1);
-    if (value)
-        ft_strlcpy(newline + origin_len + line_len, value, value_len + 1);
-    return (free(origin), free(value), newline);
+    while (i < nstrs)
+    {
+        if (strs[i])
+        {
+            srclen = ft_strlen(strs[i]);
+            ft_memcpy(result + offset, strs[i], srclen);
+            offset += srclen;
+        }
+        i++;
+    }
+    result[total_len] = '\0';
+    return result;
 }
 
 char *expand_line(char *line, size_t last_status)
@@ -85,7 +102,7 @@ char *expand_line(char *line, size_t last_status)
             value = ft_strdup(value);
         if (key[0] == '?')
             value = ft_itoa(last_status);
-        result = create_line(result, line, value);
+        result = create_line((char *[]){result, line, value}, 3);
         line = &line[i + (line[i] == '?')];
         free(key);
     }
