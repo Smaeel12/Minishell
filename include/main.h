@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/27 14:23:56 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/28 18:17:36 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,52 +41,53 @@
 
 enum e_token_type
 {
-    SCAN,
-    WORD,
-    DQTS = '"',
-    PIPE = '|',
-    SQTS = '\'',
-    INRDR = '<',
-    ANDOP = '&',
-    OUTRDR = '>',
-    OPARENTHSIS = '(',
-    CPARENTHSIS = ')',
+	SCAN,
+	WORD,
+	DQTS = '"',
+	PIPE = '|',
+	SQTS = '\'',
+	INRDR = '<',
+	ANDOP = '&',
+	OUTRDR = '>',
+	OPARENTHSIS = '(',
+	CPARENTHSIS = ')',
 };
 enum e_node_type
 {
-    NODE_COMMAND,
-    NODE_OPERATOR,
+	NONE,
+	NODE_COMMAND,
+	NODE_OPERATOR,
 };
 enum e_errors
 {
-    OK,
-    QTS_ERR,
+	OK,
+	QTS_ERR,
 };
 
 /** STRUCTS */
 
 typedef struct s_token
 {
-    char *value;
-    enum e_token_type type;
+	char *value;
+	enum e_token_type type;
 } t_token;
 typedef struct s_tree
 {
-    enum e_node_type type;
-    union
-    {
-        struct
-        {
-            char *value;
-            struct s_tree *left;
-            struct s_tree *right;
-        } operator;
-        struct
-        {
-            char *arguments[MAX_ARGS];
-            char *redirections[MAX_REDIRECTIONS];
-        } command;
-    };
+	enum e_node_type type;
+	union
+	{
+		struct
+		{
+			char *value;
+			struct s_tree *left;
+			struct s_tree *right;
+		} operator;
+		struct
+		{
+			char *arguments[MAX_ARGS];
+			char *redirections[MAX_REDIRECTIONS];
+		} command;
+	};
 } t_tree;
 
 /** PROTOTYPES */
@@ -95,24 +96,31 @@ enum e_errors tokenize_cmdline(t_list **lst, char *line);
 t_tree *parse_pipeline(t_list *tokens, size_t last_status);
 t_tree *parse_command(t_list **tokens, size_t last_status);
 
-t_token *create_token(enum e_token_type type, char *line, size_t len);
-char *expand_line(char *line, size_t last_status);
-void clear_tree(t_tree *tree);
-void clear_token(void *arg);
-
-char *create_line(char **strs, size_t nstrs);
-
+char *find_command(char *line, char **paths);
+int open_streams(int *streams, char **redirections);
 int execute_commands(t_tree *tree, char **paths, int *streams, int unused);
+
+t_token *create_token(enum e_token_type type, char *line, size_t len);
+char *create_line(char **strs, size_t nstrs);
+char *expand_line(char *line, size_t last_status);
+
+void clear_token(void *arg);
+void clear_tree(t_tree *tree);
+int clear_paths(char **paths);
+
+/// DEBUGG
+void ft_puts(void *arg);
+void print_tree(t_tree *tree);
 
 /** INLINE FUNCS */
 
 static inline enum e_token_type advance(char c)
 {
-    if (ft_strchr(VALID_TOKENS, c))
-        return (c);
-    if (c && c != ' ')
-        return (WORD);
-    return (SCAN);
+	if (ft_strchr(VALID_TOKENS, c))
+		return (c);
+	if (c && c != ' ')
+		return (WORD);
+	return (SCAN);
 }
 
 #endif
