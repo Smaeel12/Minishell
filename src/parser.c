@@ -6,19 +6,21 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/28 14:55:36 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/28 23:11:38 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-enum e_errors	tokenize_cmdline(t_list **lst, char *line)
+t_list *tokenize_cmdline(char *line)
 {
-	enum e_token_type	cstate;
-	enum e_token_type	state;
-	size_t				i;
+	enum e_token_type cstate;
+	enum e_token_type state;
+	t_list *lst;
+	size_t i;
 
 	i = 0;
+	lst = NULL;
 	cstate = SCAN;
 	state = advance(line[i]);
 	while (line[i])
@@ -29,65 +31,62 @@ enum e_errors	tokenize_cmdline(t_list **lst, char *line)
 		if (state != cstate || state == DQTS || state == SQTS)
 		{
 			if ((state == DQTS || state == SQTS) && line[i - 1] != (char)state)
-				return (QTS_ERR);
+				return (ft_putendl_fd("Unclosed Quotes", 2), NULL);
 			if (state != SCAN)
-				ft_lstadd_back(lst, ft_lstnew(create_token(state, line, i)));
+				ft_lstadd_back(&lst, ft_lstnew(create_token(state, line, i)));
 			line = &line[i];
 			state = cstate;
 			cstate = SCAN;
 			i = 0;
 		}
 	}
-	return (OK);
+	return (lst);
 }
 
-t_tree	*parse_pipeline(t_list *tokens, size_t last_status)
+t_tree *parse_pipeline(t_list *tokens, size_t last_status)
 {
-	t_tree	*left;
-	t_tree	*right;
+	t_tree *left;
+	t_tree *right;
 
 	left = parse_command(&tokens, last_status);
 	while (tokens && ((t_token *)tokens->content)->type == PIPE)
 	{
 		right = (t_tree *)malloc(sizeof(t_tree));
 		ft_bzero(right, sizeof(t_tree));
-		right->operator.value =((t_token *)tokens->content)->value;
+		right->operator.value = ((t_token *)tokens->content)->value;
 		right->type = NODE_OPERATOR;
 		tokens = tokens->next;
 		right->operator.right = parse_command(&tokens, last_status);
 		right->operator.left = left;
-		if (!left || right->operator.right == NULL
-			|| ft_strlen(right->operator.value) > 2)
+		if (!left || right->operator.right == NULL || ft_strlen(right->operator.value) > 2)
 			return (ft_putendl_fd(INV_PIPE, 2), clear_tree(right), NULL);
 		left = right;
 	}
 	return (left);
 }
 
-t_tree	*parse_command(t_list **tokens, size_t last_status)
+t_tree *parse_command(t_list **tokens, size_t last_status)
 {
-	char	*expanded_line;
-	t_token	*token;
-	t_tree	*node;
-	size_t	aidx;
-	size_t	ridx;
+	char *expanded_line;
+	t_token *token;
+	t_tree *node;
+	size_t aidx;
+	size_t ridx;
 
 	aidx = 0;
 	ridx = 0;
 	if (!tokens || !*tokens)
 		return (NULL);
 	token = (t_token *)(*tokens)->content;
-	if (!(token->type == DQTS || token->type == SQTS || token->type == WORD
-			|| token->type == OUTRDR || token->type == INRDR))
+	if (!(token->type == DQTS || token->type == SQTS || token->type == WORD || token->type == OUTRDR || token->type == INRDR))
 		return (NULL);
 	node = (t_tree *)malloc(sizeof(t_tree));
 	ft_bzero(node, sizeof(t_tree));
 	while (*tokens)
 	{
 		token = (t_token *)(*tokens)->content;
-		if (!(token->type == DQTS || token->type == SQTS || token->type == WORD
-				|| token->type == OUTRDR || token->type == INRDR))
-			break ;
+		if (!(token->type == DQTS || token->type == SQTS || token->type == WORD || token->type == OUTRDR || token->type == INRDR))
+			break;
 		if (token->type == DQTS || token->type == WORD)
 		{
 			expanded_line = expand_line(token->value, last_status);

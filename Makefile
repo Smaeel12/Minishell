@@ -12,13 +12,16 @@ objs/%.o: %.c
 all: $(NAME)
 
 $(NAME): $(OBJS)
+	make -C libft
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) -Llibft -lft -lreadline -ltermcap
 
 
 clean:
+	make clean -C libft
 	rm -rf objs/
 
 fclean: clean
+	make fclean -C libft
 	rm -rf $(NAME)
 
 re: fclean all

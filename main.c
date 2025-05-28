@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/28 18:17:53 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/28 22:13:36 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,6 +25,8 @@ int main(void)
 		line = readline("$> ");
 		if (!line)
 			break;
+		rl_on_new_line();
+		add_history(line);
 		tokenize_cmdline(&tokens, line);
 		tree = parse_pipeline(tokens, 0);
 		execute_commands(tree, paths, (int[]){dup(0), dup(1)}, -1);
@@ -33,6 +35,7 @@ int main(void)
 		ft_lstclear(&tokens, clear_token);
 		free(line);
 	}
+	rl_clear_history();
 	clear_paths(paths);
 	return (0);
 }

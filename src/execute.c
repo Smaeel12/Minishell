@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/28 18:28:05 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/28 22:48:30 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,11 @@ char *find_command(char *line, char **paths)
 
 	i = 0;
 	command = ft_strdup(line);
+	if (command[0] == '/' || !ft_strncmp(command, "./", 2))
+		return (command);
 	while (paths[i])
 	{
-		if (!access(command, X_OK) && command[0] == '/')
+		if (!access(command, X_OK | F_OK) && command[0] == '/')
 			return (command);
 		free(command);
 		command = create_line((char *[]){paths[i], "/", line}, 3);
@@ -86,8 +88,8 @@ int execute_commands(t_tree *tree, char **paths, int *streams, int unused)
 		return (1);
 	if (pid == 0)
 	{
-		command = find_command(tree->command.arguments[0], paths);
 		open_streams(streams, tree->command.redirections);
+		command = find_command(tree->command.arguments[0], paths);
 		if (unused != -1)
 			close(unused);
 		if (!command)
