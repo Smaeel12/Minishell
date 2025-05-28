@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/28 18:17:36 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/28 23:18:16 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,7 +92,7 @@ typedef struct s_tree
 
 /** PROTOTYPES */
 
-enum e_errors tokenize_cmdline(t_list **lst, char *line);
+t_list *tokenize_cmdline(char *line);
 t_tree *parse_pipeline(t_list *tokens, size_t last_status);
 t_tree *parse_command(t_list **tokens, size_t last_status);
 

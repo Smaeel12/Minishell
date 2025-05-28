@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/28 22:48:30 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/28 23:49:49 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,13 +23,13 @@ char *find_command(char *line, char **paths)
 		return (command);
 	while (paths[i])
 	{
-		if (!access(command, X_OK | F_OK) && command[0] == '/')
+		command = create_line((char *[]){paths[i], "/", line}, 3);
+		if (!access(command, X_OK | F_OK))
 			return (command);
 		free(command);
-		command = create_line((char *[]){paths[i], "/", line}, 3);
 		i++;
 	}
-	return (free(command), NULL);
+	return (NULL);
 }
 
 int open_streams(int *streams, char **redirections)
@@ -80,7 +80,6 @@ int execute_commands(t_tree *tree, char **paths, int *streams, int unused)
 		close(pipefds[0]);
 		close(pipefds[1]);
 		wait(NULL);
-		wait(NULL);
 		return (0);
 	}
 	pid = fork();
@@ -101,7 +100,9 @@ int execute_commands(t_tree *tree, char **paths, int *streams, int unused)
 		execve(command, tree->command.arguments, environ);
 		perror(tree->command.arguments[0]);
 		free(command);
-		exit(1);
+		if (errno == ENOENT)
+			exit(127);
+		exit(126);
 	}
 	return (0);
 }
