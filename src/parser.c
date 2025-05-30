@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/29 00:41:05 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/05/30 17:00:33 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,21 +23,28 @@ t_list *tokenize_cmdline(char *line)
 	lst = NULL;
 	cstate = SCAN;
 	state = advance(line[i]);
-	while (line[i])
+	while (line[i++])
 	{
-		while (line[i++] && (state == DQTS || state == SQTS) && state != cstate)
-			cstate = advance(line[i]);
+		while (line[i] && (state == DQTS || state == SQTS) && state != cstate)
+			cstate = advance(line[i++]);
+		if ((state == DQTS || state == SQTS) && state != cstate)
+			return (ft_putendl_fd("Unclosed Quotes", 2), NULL);
+
 		cstate = advance(line[i]);
-		if (state != cstate || state == DQTS || state == SQTS)
+		if (state != cstate)
 		{
-			if ((state == DQTS || state == SQTS) && line[i - 1] != (char)state)
-				return (ft_putendl_fd("Unclosed Quotes", 2), NULL);
 			if (state != SCAN)
 				ft_lstadd_back(&lst, ft_lstnew(create_token(state, line, i)));
 			line = &line[i];
 			state = cstate;
 			cstate = SCAN;
 			i = 0;
+		}
+
+		if (cstate == DQTS || cstate == SQTS)
+		{
+			state = cstate;
+			cstate = SCAN;
 		}
 	}
 	return (lst);

@@ -4,7 +4,7 @@
 void ft_puts(void *arg)
 {
 	t_token *token = arg;
-	printf("%#x || %s\n", token->type, token->value);
+	printf("%#x || [%s]\n", token->type, token->value);
 }
 
 void print_tree(t_tree *tree)
