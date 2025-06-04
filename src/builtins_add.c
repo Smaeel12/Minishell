@@ -1,45 +1,27 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   resource_cleanup.c                                 :+:      :+:    :+:   */
+/*   builtins_add.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/28 18:13:59 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/01 19:36:42 by iboubkri         ###   ########.fr       */
+/*   Created: 2025/05/30 22:04:01 by iboubkri          #+#    #+#             */
+/*   Updated: 2025/05/30 22:06:42 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-void	clear_token(void *arg)
+void	unset(char **argv, char **envp)
 {
-	t_token	*token;
-
-	token = arg;
-	free(token->value);
-	free(token);
+	(void)argv;
+	(void)envp;
+	exit(0);
 }
 
-void	clear_tree(t_tree *tree)
+void	export(char **argv, char **envp)
 {
-	if (tree == NULL || tree->type == NODE_COMMAND)
-	{
-		free(tree);
-		return ;
-	}
-	clear_tree(tree->operator.left);
-	clear_tree(tree->operator.right);
-	free(tree);
-}
-
-int	clear_paths(char **paths)
-{
-	size_t	i;
-
-	i = 0;
-	while (paths[i])
-		free(paths[i++]);
-	free(paths);
-	return (0);
+	(void)argv;
+	(void)envp;
+	exit(0);
 }

@@ -1,45 +1,35 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   resource_cleanup.c                                 :+:      :+:    :+:   */
+/*   signals.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/05/28 18:13:59 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/01 19:36:42 by iboubkri         ###   ########.fr       */
+/*   Created: 2025/05/30 19:15:16 by iboubkri          #+#    #+#             */
+/*   Updated: 2025/06/01 20:09:59 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-void	clear_token(void *arg)
+void	sigint_handler(int segnum)
 {
-	t_token	*token;
-
-	token = arg;
-	free(token->value);
-	free(token);
+	(void)segnum;
+	printf("\n");
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
 }
 
-void	clear_tree(t_tree *tree)
+void	init_signals(void)
 {
-	if (tree == NULL || tree->type == NODE_COMMAND)
-	{
-		free(tree);
-		return ;
-	}
-	clear_tree(tree->operator.left);
-	clear_tree(tree->operator.right);
-	free(tree);
-}
+	struct sigaction	sa;
 
-int	clear_paths(char **paths)
-{
-	size_t	i;
-
-	i = 0;
-	while (paths[i])
-		free(paths[i++]);
-	free(paths);
-	return (0);
+	rl_catch_signals = 0;
+	sa.sa_flags = SA_RESTART;
+	sigemptyset(&sa.sa_mask);
+	sa.sa_handler = SIG_IGN;
+	sigaction(SIGQUIT, &sa, NULL);
+	sa.sa_handler = sigint_handler;
+	sigaction(SIGINT, &sa, NULL);
 }

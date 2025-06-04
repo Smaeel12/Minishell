@@ -6,15 +6,15 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/28 18:14:50 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/04 01:36:17 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-t_token	*create_token(enum e_token_type type, char *line, size_t len)
+t_token *create_token(enum e_token_type type, char *line, size_t len)
 {
-	t_token	*token;
+	t_token *token;
 
 	token = (t_token *)malloc(sizeof(t_token));
 	if (!token)
@@ -24,68 +24,96 @@ t_token	*create_token(enum e_token_type type, char *line, size_t len)
 	return (token);
 }
 
-char	*create_line(char **strs, size_t nstrs)
+char *create_line(char **strs, size_t nstrs)
 {
-	size_t	total_len;
-	size_t	offset;
-	size_t	srclen;
-	char	*result;
-	size_t	i;
+	size_t total_len;
+	size_t offset;
+	char *result;
+	size_t i;
 
-	i = 0;
-	offset = 0;
+	i = -1;
 	total_len = 0;
-	while (i < nstrs)
+	while (++i < nstrs)
 	{
 		if (strs[i])
 			total_len += ft_strlen(strs[i]);
-		i++;
 	}
-	i = 0;
+	i = -1;
+	offset = 0;
 	result = (char *)malloc((total_len + 1) * sizeof(char));
 	if (!result)
 		return (NULL);
-	while (i < nstrs)
+	while (++i < nstrs)
 	{
 		if (strs[i])
-		{
-			srclen = ft_strlen(strs[i]);
-			ft_memcpy(result + offset, strs[i], srclen);
-			offset += srclen;
-		}
-		i++;
+			offset += ft_strlcpy(result + offset, strs[i], ft_strlen(strs[i]) + 1);
+		free(strs[i]);
 	}
-	result[total_len] = '\0';
-	return (result);
+	return (result[total_len] = '\0', result);
 }
 
-char	*expand_line(char *line, size_t last_status)
+char *get_value(char *key, size_t last_status)
 {
-	char	*result;
-	char	*value;
-	char	*key;
-	size_t	i;
+	char *value;
 
-	result = NULL;
-	while (*line)
+	value = getenv(key);
+	if (value)
+		value = ft_strdup(value);
+	if (key[0] == '?')
+		value = ft_itoa(last_status);
+	return (free(key), value);
+}
+
+char *join_string(char *line)
+{
+	char *command;
+	size_t len;
+	size_t i;
+	size_t j;
+
+	i = 0;
+	j = 0;
+	len = ft_strlen(line);
+	command = (char *)malloc((len + 1) * sizeof(char));
+	while (i < len)
 	{
-		i = 0;
-		while (line[++i] && !(line[i - 1] == '$' && (ft_isalpha(line[i])
-					|| line[i] == '_' || line[i] == '?')))
-			;
-		key = &line[i];
-		line[i - (*key && line[i - 1] == '$')] = '\0';
-		while (line[i] && (ft_isalnum(line[i]) || line[i] == '_'))
+		while (line[i] == '\'' || line[i] == '"')
 			i++;
-		key = ft_substr(key, 0, (&line[i] - key) + (line[i] == '?'));
-		value = getenv(key);
-		if (value)
-			value = ft_strdup(value);
-		if (key[0] == '?')
-			value = ft_itoa(last_status);
-		result = create_line((char *[]){result, line, value}, 3);
-		line = &line[i + (line[i] == '?')];
-		free(key);
+		command[j++] = line[i++];
 	}
-	return (result);
+	command[j] = '\0';
+	return (command);
+}
+
+char *expand_line(t_token *token, size_t last_status)
+{
+	char *result;
+	size_t start;
+	char *key;
+	size_t i;
+
+	i = 0;
+	result = NULL;
+	while (token->value[i])
+	{
+		start = i;
+		while ((token->type == SQTS || token->value[start] == '\'') && token->value[++i] != '\'')
+			;
+		if (i > 0)
+			result = create_line((char *[]){result, ft_substr(token->value, start + 1, i - 1)}, 2);
+
+		start = i;
+		while (token->value[++i] && !(token->value[i - 1] == '$' && (ft_isalpha(token->value[i]) || token->value[i] == '_' || token->value[i] == '?')))
+			;
+
+		if (token->value[i])
+		{
+			key = &token->value[i];
+			while (*key && token->value[++i] && (ft_isalnum(token->value[i]) || token->value[i] == '_'))
+				;
+			key = ft_substr(key, 0, (&token->value[i] - key));
+			result = create_line((char *[]){result, ft_substr(token->value, start, i - start - ft_strlen(key) - 1), get_value(key, last_status)}, 3);
+		}
+	}
+	return (free(token->value), token->value = join_string(result), free(result), token->value);
 }

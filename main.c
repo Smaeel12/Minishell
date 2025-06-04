@@ -6,37 +6,51 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/05/28 23:25:20 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/02 23:50:43 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "include/main.h"
 
+char *get_line(void)
+{
+	char *line;
+
+	line = readline("$> ");
+	if (line)
+	{
+		rl_on_new_line();
+		add_history(line);
+	}
+	return (line);
+}
+
 int main(void)
 {
-	t_list *tokens = NULL;
-	t_tree *tree = NULL;
-	char **paths = NULL;
-	int last_status = 0;
-	char *line = NULL;
+	t_list *tokens;
+	t_tree *tree;
+	char **paths;
+	char *line;
+	int lstatus;
 
+	lstatus = 0;
+	tokens = NULL;
+	init_signals();
 	paths = ft_split(getenv("PATH"), ':');
 	while (1)
 	{
-		line = readline("$> ");
+		line = get_line();
 		if (!line)
 			break;
-		rl_on_new_line();
-		add_history(line);
-		tokens = tokenize_cmdline(line);
-		tree = parse_pipeline(tokens, WEXITSTATUS(last_status));
-		execute_commands(tree, paths, (int[]){dup(0), dup(1)}, -1);
+		tokenize_cmdline(&tokens, line);
+		// ft_lstiter(tokens, ft_puts); // debug
+		tree = parse_pipeline(tokens, WEXITSTATUS(lstatus));
+		print_tree(tree);
+		execute_pipeline(tree, paths, (int[]){dup(0), dup(1)}, -1);
+		wait(&lstatus);
 		ft_lstclear(&tokens, clear_token);
-		wait(&last_status);
 		clear_tree(tree);
 		free(line);
 	}
-	rl_clear_history();
-	clear_paths(paths);
-	return (0);
+	return (rl_clear_history(), clear_paths(paths), 0);
 }
