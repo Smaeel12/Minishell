@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 19:25:14 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/02 23:44:16 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/06 06:16:33 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,16 +20,16 @@
 // ◦ env with no options or arguments
 // ◦ exit with no options
 
-void	bexit(char **argv, char **envp)
+void bexit(char **argv, char **envp)
 {
 	(void)argv;
 	(void)envp;
 	exit(0);
 }
 
-void	env(char **argv, char **envp)
+void env(char **argv, char **envp)
 {
-	size_t	i;
+	size_t i;
 
 	(void)argv;
 	i = 0;
@@ -38,9 +38,9 @@ void	env(char **argv, char **envp)
 	exit(0);
 }
 
-void	pwd(char **argv, char **envp)
+void pwd(char **argv, char **envp)
 {
-	char	*buf;
+	char *buf;
 
 	(void)argv;
 	(void)envp;
@@ -49,34 +49,17 @@ void	pwd(char **argv, char **envp)
 	exit(0);
 }
 
-void	echo(char **argv, char **envp)
+void echo(char **argv, char **envp)
 {
-	size_t	newline;
-	size_t	i;
+	size_t i = 0;
 
 	(void)envp;
-	i = 0;
-	newline = 1;
-	if (argv[1] && argv[1][i++] == '-')
-	{
-		while (argv[1][i] == 'n')
-			i++;
-	}
-	if (!argv[1][i])
-		newline = 0;
-	i = 1 + !newline;
 	while (argv[i])
-	{
-		if (i > 1 + !newline)
-			printf(" ");
-		printf("%s", argv[i++]);
-	}
-	if (newline)
-		printf("\n");
+		printf("%s\n", argv[i++]);
 	exit(0);
 }
 
-void	cd(char **argv, char **envp)
+void cd(char **argv, char **envp)
 {
 	(void)envp;
 	printf("changing directory\n");

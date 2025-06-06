@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/01 20:08:25 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/06 05:49:39 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -100,7 +100,7 @@ typedef struct s_tree
 /** PROTOTYPES */
 
 int tokenize_cmdline(t_list **lst, char *line);
-t_tree *parse_pipeline(t_list *tokens, size_t last_status);
+t_tree *parse_pipeline(t_list *tokens);
 
 int execute_pipeline(t_tree *tree, char **paths, int *streams, int unused);
 int open_streams(int *streams, char **redirections, int unused);
@@ -108,7 +108,7 @@ int execute_command(char **command, char **paths);
 char *find_command(char *line, char **paths);
 
 t_token *create_token(enum e_token_type type, char *line, size_t len);
-char *expand_line(t_token *token, size_t last_status);
+char *expand_line(t_token *token);
 char *create_line(char **strs, size_t nstrs);
 
 void clear_token(void *arg);
@@ -139,5 +139,9 @@ static inline enum e_token_type advance(char c)
 		return (WORD);
 	return (SCAN);
 }
+
+/** VARIABLES */
+
+int exit_status;
 
 #endif

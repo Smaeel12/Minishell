@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/02 23:50:43 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/06 05:52:23 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,9 +31,7 @@ int main(void)
 	t_tree *tree;
 	char **paths;
 	char *line;
-	int lstatus;
 
-	lstatus = 0;
 	tokens = NULL;
 	init_signals();
 	paths = ft_split(getenv("PATH"), ':');
@@ -44,10 +42,10 @@ int main(void)
 			break;
 		tokenize_cmdline(&tokens, line);
 		// ft_lstiter(tokens, ft_puts); // debug
-		tree = parse_pipeline(tokens, WEXITSTATUS(lstatus));
+		tree = parse_pipeline(tokens);
 		print_tree(tree);
 		execute_pipeline(tree, paths, (int[]){dup(0), dup(1)}, -1);
-		wait(&lstatus);
+		wait(&exit_status);
 		ft_lstclear(&tokens, clear_token);
 		clear_tree(tree);
 		free(line);

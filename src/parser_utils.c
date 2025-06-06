@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/04 01:36:17 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/06 06:10:27 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,19 +52,20 @@ char *create_line(char **strs, size_t nstrs)
 	return (result[total_len] = '\0', result);
 }
 
-char *get_value(char *key, size_t last_status)
+char *get_env_value(char *key)
 {
 	char *value;
 
+	if (!key || !*key)
+		return (NULL);
 	value = getenv(key);
 	if (value)
 		value = ft_strdup(value);
 	if (key[0] == '?')
-		value = ft_itoa(last_status);
+		value = ft_itoa(WEXITSTATUS(exit_status));
 	return (free(key), value);
 }
-
-char *join_string(char *line)
+char *concatenate_string(char *line)
 {
 	char *command;
 	size_t len;
@@ -82,14 +83,14 @@ char *join_string(char *line)
 		command[j++] = line[i++];
 	}
 	command[j] = '\0';
-	return (command);
+	return (free(line), command);
 }
 
-char *expand_line(t_token *token, size_t last_status)
+char *expand_line(t_token *token)
 {
 	char *result;
-	size_t start;
 	char *key;
+	size_t start;
 	size_t i;
 
 	i = 0;
@@ -97,23 +98,18 @@ char *expand_line(t_token *token, size_t last_status)
 	while (token->value[i])
 	{
 		start = i;
-		while ((token->type == SQTS || token->value[start] == '\'') && token->value[++i] != '\'')
+		while (token->value[start] == SQTS && token->value[++i] != SQTS)
 			;
-		if (i > 0)
-			result = create_line((char *[]){result, ft_substr(token->value, start + 1, i - 1)}, 2);
-
-		start = i;
 		while (token->value[++i] && !(token->value[i - 1] == '$' && (ft_isalpha(token->value[i]) || token->value[i] == '_' || token->value[i] == '?')))
 			;
-
-		if (token->value[i])
-		{
-			key = &token->value[i];
-			while (*key && token->value[++i] && (ft_isalnum(token->value[i]) || token->value[i] == '_'))
-				;
-			key = ft_substr(key, 0, (&token->value[i] - key));
-			result = create_line((char *[]){result, ft_substr(token->value, start, i - start - ft_strlen(key) - 1), get_value(key, last_status)}, 3);
-		}
+		key = &token->value[i];
+		while (*key && token->value[++i] && (ft_isalnum(token->value[i]) || token->value[i] == '_'))
+			;
+		key = ft_substr(key, 0, (&token->value[i] - key));
+		result = create_line((char *[]){result,
+										ft_substr(token->value, start, i - start - ft_strlen(key) - (*key != '\0')),
+										get_env_value(key)},
+							 3);
 	}
-	return (free(token->value), token->value = join_string(result), free(result), token->value);
+	return (concatenate_string(result));
 }
