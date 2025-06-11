@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/06 05:49:39 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/11 01:03:49 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,6 +47,8 @@ enum e_token_type
 {
 	SCAN,
 	WORD,
+	APPEND,
+	HEREDOC,
 	DQTS = '"',
 	PIPE = '|',
 	SQTS = '\'',
@@ -90,7 +92,11 @@ typedef struct s_tree
 		struct
 		{
 			char *arguments[MAX_ARGS];
-			char *redirections[MAX_REDIRECTIONS];
+			struct s_redirections
+			{
+				enum e_token_type type;
+				char *filename;
+			} redirections[MAX_REDIRECTIONS];
 			size_t aidx;
 			size_t ridx;
 		} command;
@@ -102,12 +108,9 @@ typedef struct s_tree
 int tokenize_cmdline(t_list **lst, char *line);
 t_tree *parse_pipeline(t_list *tokens);
 
-int execute_pipeline(t_tree *tree, char **paths, int *streams, int unused);
-int open_streams(int *streams, char **redirections, int unused);
-int execute_command(char **command, char **paths);
-char *find_command(char *line, char **paths);
+int execute_pipeline(t_tree *tree, char **paths, int *streams);
 
-t_token *create_token(enum e_token_type type, char *line, size_t len);
+int add_token(t_list **lst, enum e_token_type state, enum e_token_type cstate, char *line, size_t len);
 char *expand_line(t_token *token);
 char *create_line(char **strs, size_t nstrs);
 

@@ -17,8 +17,8 @@ void print_tree(t_tree *tree)
 		for (size_t i = 0; tree->command.arguments[i]; i++)
 			printf("\t%li: %s\n", i, tree->command.arguments[i]);
 		printf("redirections:\n");
-		for (size_t i = 0; tree->command.redirections[i]; i++)
-			printf("\t%li: %s\n", i, tree->command.redirections[i]);
+		for (size_t i = 0; i < tree->command.ridx; i++)
+			printf("\t%li: [%#x] %s\n", i, tree->command.redirections[i].type, tree->command.redirections[i].filename);
 		return;
 	}
 	print_tree(tree->operator.left);

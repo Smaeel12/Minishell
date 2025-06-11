@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/06 05:49:27 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/11 01:03:34 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,42 +14,52 @@
 
 int tokenize_cmdline(t_list **lst, char *line)
 {
-	enum e_token_type *st;
+	enum e_token_type cstate;
+	enum e_token_type state;
 	size_t i;
 
 	i = 0;
-	st = (enum e_token_type[]){SCAN, advance(line[i])};
+	state = advance(line[i]);
 	while (line[i++])
 	{
-		while (line[i] && (st[1] == DQTS || st[1] == SQTS) && st[1] != st[0])
-			st[0] = advance(line[i++]);
-		if ((st[1] == DQTS || st[1] == SQTS) && st[1] != st[0])
-			return (ft_putendl_fd(QTS_ERR, 2), ft_lstclear(lst, free),
-					*lst = NULL, 1);
-		st[0] = advance(line[i]);
-		if (st[0] == SCAN || (!st[1] && st[0] != st[1]))
+		cstate = SCAN;
+		while (line[i] && (state == DQTS || state == SQTS) && cstate != state)
+			cstate = advance(line[i++]);
+		if ((state == DQTS || state == SQTS) && cstate != state)
+			return (ft_putendl_fd(QTS_ERR, 2), ft_lstclear(lst, free), 1);
+		cstate = advance(line[i]);
+		if (cstate != state)
 		{
-			if (st[1] != SCAN)
-				ft_lstadd_back(lst, ft_lstnew(create_token(st[1], line, i)));
-			st = (enum e_token_type[]){SCAN, advance(line[i])};
-			line = &line[i];
-			i = 0;
+			if (add_token(lst, state, cstate, line, i))
+			{
+				line = &line[i];
+				i = 0;
+			}
+			state = cstate;
 		}
-		if (st[0] == DQTS || st[0] == SQTS || st[1] == DQTS || st[1] == SQTS)
-			st = (enum e_token_type[]){SCAN, advance(line[i])};
 	}
 	return (0);
 }
 
 static int parse_redirection(t_tree *node, t_list **tokens)
 {
-	if (ft_strlen(((t_token *)(*tokens)->content)->value) > 2)
+	size_t len;
+
+	len = ft_strlen(((t_token *)(*tokens)->content)->value);
+	if (len > 2)
 		return (ft_putendl_fd(INV_RDR, 2), 1);
-	node->command.redirections[node->command.ridx++] = ((t_token *)(*tokens)->content)->value;
+	else if (((t_token *)(*tokens)->content)->value[0] == '<' && len == 2)
+		node->command.redirections[node->command.ridx].type = HEREDOC;
+	else if (((t_token *)(*tokens)->content)->value[0] == '<' && len == 1)
+		node->command.redirections[node->command.ridx].type = INRDR;
+	else if (((t_token *)(*tokens)->content)->value[0] == '>' && len == 2)
+		node->command.redirections[node->command.ridx].type = APPEND;
+	else if (((t_token *)(*tokens)->content)->value[0] == '>' && len == 1)
+		node->command.redirections[node->command.ridx].type = OUTRDR;
 	*tokens = (*tokens)->next;
 	if (!*tokens || ((t_token *)(*tokens)->content)->type != WORD)
 		return (ft_putendl_fd(INV_RDR_FILE, 2), 1);
-	node->command.redirections[node->command.ridx++] = expand_line((*tokens)->content);
+	node->command.redirections[node->command.ridx++].filename = expand_line((*tokens)->content);
 	return (0);
 }
 
