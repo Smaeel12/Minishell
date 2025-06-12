@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/06 05:52:23 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/12 13:56:51 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,7 +44,7 @@ int main(void)
 		// ft_lstiter(tokens, ft_puts); // debug
 		tree = parse_pipeline(tokens);
 		print_tree(tree);
-		execute_pipeline(tree, paths, (int[]){dup(0), dup(1)}, -1);
+		execute_pipeline(tree, paths, (int[]){dup(0), dup(1), -1});
 		wait(&exit_status);
 		ft_lstclear(&tokens, clear_token);
 		clear_tree(tree);

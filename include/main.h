@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/11 01:03:49 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/12 14:06:47 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,10 +65,17 @@ enum e_node_type
 	NODE_OPERATOR,
 };
 
+enum
+{
+	IN,
+	OUT,
+	UNUSED,
+};
+
 /** STRUCTS */
 typedef struct s_cmd
 {
-	char *name;
+	char *path;
 	void (*func)(char **argv, char **envp);
 } t_cmd;
 
@@ -89,7 +96,7 @@ typedef struct s_tree
 			struct s_tree *left;
 			struct s_tree *right;
 		} operator;
-		struct
+		struct s_command
 		{
 			char *arguments[MAX_ARGS];
 			struct s_redirections
