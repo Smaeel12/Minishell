@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/12 14:06:47 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/14 12:39:52 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,12 @@
 #define MAIN_H
 
 /** INCLUDES */
-
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "../libft/libft.h"
 #include <sys/resource.h>
 #include <sys/wait.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
@@ -29,7 +29,6 @@
 #include <errno.h>
 
 /** DEFINITIONS */
-
 #define EXPECTED_VALID_FILENAME "Expected a valid filename for redirection"
 #define INV_RDR_FILE "Invalid Redirection File the file should be a word"
 #define MISSING_FILENAME "Missing filename for redirection"
@@ -42,7 +41,6 @@
 #define MAX_ARGS 128
 
 /** ENUMS **/
-
 enum e_token_type
 {
 	SCAN,
@@ -58,6 +56,7 @@ enum e_token_type
 	OPARENTHSIS = '(',
 	CPARENTHSIS = ')',
 };
+
 enum e_node_type
 {
 	NONE,
@@ -76,7 +75,7 @@ enum
 typedef struct s_cmd
 {
 	char *path;
-	void (*func)(char **argv, char **envp);
+	int (*func)(char **argv);
 } t_cmd;
 
 typedef struct s_token
@@ -110,37 +109,52 @@ typedef struct s_tree
 	};
 } t_tree;
 
-/** PROTOTYPES */
+struct s_global_data
+{
+	char **environs;
+	int exit_status;
+	size_t env_size;
+};
 
-int tokenize_cmdline(t_list **lst, char *line);
-t_tree *parse_pipeline(t_list *tokens);
+/** VARIABLE */
+struct s_global_data g_data;
+
+/** PROTOTYPES */
+t_tree *parse_line(void);
 
 int execute_pipeline(t_tree *tree, char **paths, int *streams);
 
 int add_token(t_list **lst, enum e_token_type state, enum e_token_type cstate, char *line, size_t len);
-char *expand_line(t_token *token);
 char *create_line(char **strs, size_t nstrs);
+int is_valid_token(t_token *token);
+char *expand_line(t_token *token);
 
 void clear_token(void *arg);
-void clear_tree(t_tree *tree);
+int clear_tree(t_tree *tree);
 int clear_paths(char **paths);
+int clear_env(void);
 
-void init_signals(void);
+int init_signals(void);
 
-void cd(char **argv, char **envp);
-void env(char **argv, char **envp);
-void pwd(char **argv, char **envp);
-void echo(char **argv, char **envp);
-void unset(char **argv, char **envp);
-void bexit(char **argv, char **envp);
-void export(char **argv, char **envp);
+int export(char **argv);
+int unset(char **argv);
+int bexit(char **argv);
+int echo(char **argv);
+int env(char **argv);
+int pwd(char **argv);
+int cd(char **argv);
+
+int set_env(char *key, char *value);
+char *get_env(char *key);
+int unset_env(char *key);
+int print_env(void);
+int init_env(void);
 
 /// DEBUGG
 void ft_puts(void *arg);
 void print_tree(t_tree *tree);
 
 /** INLINE FUNCS */
-
 static inline enum e_token_type advance(char c)
 {
 	if (ft_strchr(VALID_TOKENS, c))
@@ -149,9 +163,5 @@ static inline enum e_token_type advance(char c)
 		return (WORD);
 	return (SCAN);
 }
-
-/** VARIABLES */
-
-int exit_status;
 
 #endif

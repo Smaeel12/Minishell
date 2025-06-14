@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/11 01:04:37 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/14 09:53:57 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -63,11 +63,6 @@ static int parse_redirection(t_tree *node, t_list **tokens)
 	return (0);
 }
 
-static int is_valid_token(t_token *token)
-{
-	return (token->type == DQTS || token->type == SQTS || token->type == WORD || token->type == OUTRDR || token->type == INRDR);
-}
-
 static t_tree *parse_command(t_list **tokens)
 {
 	t_tree *node;
@@ -113,4 +108,24 @@ t_tree *parse_pipeline(t_list *tokens)
 		left = right;
 	}
 	return (left);
+}
+
+t_tree *parse_line(void)
+{
+	t_list *tokens;
+	t_tree *tree;
+	char *line;
+
+	tree = NULL;
+	tokens = NULL;
+	line = readline("$> ");
+	if (line)
+	{
+		rl_on_new_line();
+		add_history(line);
+		tokenize_cmdline(&tokens, line);
+		tree = parse_pipeline(tokens);
+		ft_lstclear(&tokens, clear_token);
+	}
+	return (free(line), tree);
 }

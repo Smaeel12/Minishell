@@ -6,13 +6,13 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 19:15:16 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/01 20:09:59 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/13 15:20:15 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-void	sigint_handler(int segnum)
+void sigint_handler(int segnum)
 {
 	(void)segnum;
 	printf("\n");
@@ -21,9 +21,9 @@ void	sigint_handler(int segnum)
 	rl_redisplay();
 }
 
-void	init_signals(void)
+int init_signals(void)
 {
-	struct sigaction	sa;
+	struct sigaction sa;
 
 	rl_catch_signals = 0;
 	sa.sa_flags = SA_RESTART;
@@ -32,4 +32,5 @@ void	init_signals(void)
 	sigaction(SIGQUIT, &sa, NULL);
 	sa.sa_handler = sigint_handler;
 	sigaction(SIGINT, &sa, NULL);
+	return (0);
 }

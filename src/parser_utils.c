@@ -6,19 +6,24 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/11 01:03:56 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/14 09:26:42 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int add_token(t_list **lst, enum e_token_type state, enum e_token_type cstate, char *line, size_t len)
+int is_valid_token(t_token *token)
+{
+	return (token->type == DQTS || token->type == SQTS || token->type == WORD || token->type == OUTRDR || token->type == INRDR);
+}
+
+int add_token(t_list **lst, enum e_token_type state, enum e_token_type cstate,
+			  char *line, size_t len)
 {
 	t_token *token;
 
-	if (((state == DQTS || state == SQTS || state == WORD) &&
-		 (cstate == WORD || cstate == DQTS || cstate == SQTS)))
-		return 0;
+	if (((state == DQTS || state == SQTS || state == WORD) && (cstate == WORD || cstate == DQTS || cstate == SQTS)))
+		return (0);
 	if (state != SCAN)
 	{
 		token = (t_token *)malloc(sizeof(t_token));
@@ -59,19 +64,6 @@ char *create_line(char **strs, size_t nstrs)
 	return (result[total_len] = '\0', result);
 }
 
-char *get_env_value(char *key)
-{
-	char *value;
-
-	if (!key || !*key)
-		return (free(key), NULL);
-	value = getenv(key);
-	if (value)
-		value = ft_strdup(value);
-	if (key[0] == '?')
-		value = ft_itoa(WEXITSTATUS(exit_status));
-	return (free(key), value);
-}
 char *concatenate_string(char *line)
 {
 	char *command;
@@ -113,9 +105,8 @@ char *expand_line(t_token *token)
 		while (*key && token->value[++i] && (ft_isalnum(token->value[i]) || token->value[i] == '_'))
 			;
 		key = ft_substr(key, 0, (&token->value[i] - key));
-		result = create_line((char *[]){result, ft_substr(token->value, start, i - start - ft_strlen(key) - (*key != '\0')),
-										get_env_value(key)},
-							 3);
+		result = create_line((char *[]){result, ft_substr(token->value, start, i - start - ft_strlen(key) - (*key != '\0')), get_env(key)}, 3);
+		free(key);
 	}
 	return (concatenate_string(result));
 }
