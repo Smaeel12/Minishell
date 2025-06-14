@@ -12,19 +12,19 @@
 
 #include "../include/main.h"
 
-void clear_token(void *arg)
+void	clear_token(void *arg)
 {
-	t_token *token;
+	t_token	*token;
 
 	token = arg;
 	free(token->value);
 	free(token);
 }
 
-int clear_tree(t_tree *tree)
+int	clear_tree(t_tree *tree)
 {
-	size_t i;
-	size_t j;
+	size_t	i;
+	size_t	j;
 
 	i = 0;
 	j = 0;
@@ -45,9 +45,9 @@ int clear_tree(t_tree *tree)
 	return (0);
 }
 
-int clear_paths(char **paths)
+int	clear_paths(char **paths)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (paths[i])
@@ -56,9 +56,9 @@ int clear_paths(char **paths)
 	return (0);
 }
 
-int clear_env(void)
+int	clear_env(void)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (g_data.environs && g_data.environs[i])

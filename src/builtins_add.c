@@ -12,18 +12,18 @@
 
 #include "../include/main.h"
 
-int unset(char **argv)
+int	unset(char **argv)
 {
-	char *key;
+	char	*key;
 
 	key = argv[1];
 	unset_env(key);
 	return (0);
 }
 
-int export(char **argv)
+int	export(char **argv)
 {
-	char **key_value;
+	char	**key_value;
 
 	if (argv[1] && argv[1][0] == '=')
 		return (ft_putendl_fd("missing key", 2), 1);

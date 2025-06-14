@@ -12,7 +12,7 @@
 
 #include "../include/main.h"
 
-void sigint_handler(int segnum)
+void	sigint_handler(int segnum)
 {
 	(void)segnum;
 	printf("\n");
@@ -21,9 +21,9 @@ void sigint_handler(int segnum)
 	rl_redisplay();
 }
 
-int init_signals(void)
+int	init_signals(void)
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	rl_catch_signals = 0;
 	sa.sa_flags = SA_RESTART;

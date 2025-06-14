@@ -12,11 +12,11 @@
 
 #include "include/main.h"
 
-int main(void)
+int	main(void)
 {
-	t_tree *tree;
-	int *streams;
-	char **paths;
+	t_tree	*tree;
+	int		*streams;
+	char	**paths;
 
 	init_env();
 	init_signals();
@@ -26,7 +26,7 @@ int main(void)
 	{
 		tree = parse_line();
 		if (!tree)
-			break;
+			break ;
 		streams = (int[]){dup(IN), dup(OUT), -1};
 		execute_pipeline(tree, paths, streams);
 		wait(&g_data.exit_status);

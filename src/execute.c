@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/14 12:56:41 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/14 21:51:59 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,8 +104,7 @@ int execute_command(struct s_command command, char **paths, int *streams)
 	cmd = (t_cmd){command.arguments[0], NULL};
 	open_streams(command.redirections, streams);
 	find_command(&cmd, paths, (t_cmd[]){{"echo", echo}, {"cd", cd}, {"pwd", pwd}, {"export", export}, {"unset", unset}, {"env", env}, {"exit", bexit}, {NULL, NULL}});
-	if (cmd.func == cd || cmd.func == export ||
-		cmd.func == unset || cmd.func == bexit)
+	if (cmd.func == cd || cmd.func == export || cmd.func == unset || cmd.func == bexit)
 		return (cmd.func(command.arguments), free(cmd.path), 0);
 	pid = fork();
 	if (pid == -1)
@@ -114,11 +113,11 @@ int execute_command(struct s_command command, char **paths, int *streams)
 	{
 		init_child(streams);
 		if (cmd.func)
-			return (cmd.func(command.arguments), free(cmd.path), 0);
+			return (cmd.func(command.arguments), free(cmd.path), exit(0), 0);
 		execve(cmd.path, command.arguments, g_data.environs);
 		return (perror(command.arguments[0]), free(cmd.path), exit(126), 0);
 	}
-	return (close(streams[IN]), close(streams[OUT]), free(cmd.path), 0);
+	return (free(cmd.path), 0);
 }
 
 int execute_pipeline(t_tree *tree, char **paths, int *streams)
