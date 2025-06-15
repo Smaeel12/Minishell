@@ -6,17 +6,17 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/15 08:48:38 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/15 10:10:07 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int tokenize_cmdline(t_list **lst, char *line)
+int	tokenize_cmdline(t_list **lst, char *line)
 {
-	enum e_token_type cstate;
-	enum e_token_type state;
-	size_t i;
+	enum e_token_type	cstate;
+	enum e_token_type	state;
+	size_t				i;
 
 	i = 0;
 	state = advance(line[i]);
@@ -41,9 +41,9 @@ int tokenize_cmdline(t_list **lst, char *line)
 	return (0);
 }
 
-static int parse_redirection(t_tree *node, t_list **tokens)
+static int	parse_redirection(t_tree *node, t_list **tokens)
 {
-	size_t len;
+	size_t	len;
 
 	len = ft_strlen(((t_token *)(*tokens)->content)->value);
 	if (len > 2)
@@ -63,9 +63,9 @@ static int parse_redirection(t_tree *node, t_list **tokens)
 	return (0);
 }
 
-static t_tree *parse_command(t_list **tokens)
+static t_tree	*parse_command(t_list **tokens)
 {
-	t_tree *node;
+	t_tree	*node;
 
 	if (!tokens || !*tokens || !is_valid_token((*tokens)->content))
 		return (NULL);
@@ -76,8 +76,10 @@ static t_tree *parse_command(t_list **tokens)
 	while (*tokens)
 	{
 		if (!is_valid_token((*tokens)->content))
-			break;
-		else if (((t_token *)(*tokens)->content)->type == DQTS || ((t_token *)(*tokens)->content)->type == SQTS || ((t_token *)(*tokens)->content)->type == WORD)
+			break ;
+		else if (((t_token *)(*tokens)->content)->type == DQTS
+			|| ((t_token *)(*tokens)->content)->type == SQTS
+			|| ((t_token *)(*tokens)->content)->type == WORD)
 			node->command.arguments[node->command.aidx++] = expand_line((*tokens)->content);
 		else if (parse_redirection(node, tokens))
 			return (free(node), NULL);
@@ -86,10 +88,10 @@ static t_tree *parse_command(t_list **tokens)
 	return (node->type = NODE_COMMAND, node);
 }
 
-t_tree *parse_pipeline(t_list *tokens)
+t_tree	*parse_pipeline(t_list *tokens)
 {
-	t_tree *left;
-	t_tree *right;
+	t_tree	*left;
+	t_tree	*right;
 
 	left = parse_command(&tokens);
 	while (tokens && ((t_token *)tokens->content)->type == PIPE)
@@ -98,19 +100,20 @@ t_tree *parse_pipeline(t_list *tokens)
 		if (!right)
 			return (ft_putendl_fd(MALLOC_FAILED, 2), clear_tree(right), NULL);
 		ft_bzero(right, sizeof(t_tree));
-		right->operator.value = ((t_token *)tokens->content)->value;
+		right->operator.value =((t_token *)tokens->content)->value;
 		right->type = NODE_OPERATOR;
 		tokens = tokens->next;
 		right->operator.right = parse_command(&tokens);
 		right->operator.left = left;
-		if (!left || right->operator.right == NULL || ft_strlen(right->operator.value) > 2)
+		if (!left || right->operator.right == NULL
+			|| ft_strlen(right->operator.value) > 2)
 			return (ft_putendl_fd(INV_PIPE, 2), clear_tree(right), NULL);
 		left = right;
 	}
 	return (left);
 }
 
-t_tree *parse_line(void)
+t_tree	*parse_line(void)
 {
 	t_list *tokens;
 	t_tree *tree;
@@ -125,7 +128,6 @@ t_tree *parse_line(void)
 		add_history(line);
 		tokenize_cmdline(&tokens, line);
 		tree = parse_pipeline(tokens);
-		print_tree(tree);
 		ft_lstclear(&tokens, clear_token);
 		free(line);
 	}

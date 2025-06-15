@@ -6,21 +6,13 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 19:25:14 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/15 09:55:34 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/15 09:57:32 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-// ◦ echo with option -n
-// ◦ cd with only a relative or absolute path
-// ◦ pwd with no options
-// ◦ export with no options
-// ◦ unset with no options
-// ◦ env with no options or arguments
-// ◦ exit with no options
-
-int bexit(char **argv)
+int	bexit(char **argv)
 {
 	clear_env();
 	if (argv[1])
@@ -28,16 +20,16 @@ int bexit(char **argv)
 	exit(0);
 }
 
-int env(char **argv)
+int	env(char **argv)
 {
 	(void)argv;
 	print_env();
 	return (0);
 }
 
-int pwd(char **argv)
+int	pwd(char **argv)
 {
-	char *buf;
+	char	*buf;
 
 	(void)argv;
 	buf = NULL;
@@ -45,11 +37,11 @@ int pwd(char **argv)
 	return (0);
 }
 
-int echo(char **argv)
+int	echo(char **argv)
 {
-	size_t newline;
-	size_t i;
-	size_t j;
+	size_t	newline;
+	size_t	i;
+	size_t	j;
 
 	i = 1;
 	newline = 1;
@@ -59,7 +51,7 @@ int echo(char **argv)
 		while (argv[i] && argv[i][0] == '-' && argv[i][++j] == 'n')
 			;
 		if ((argv[i] && argv[i][j] != '\0' && j > 1) || argv[i][0] != '-')
-			break;
+			break ;
 		newline = 0;
 		i++;
 	}
@@ -72,7 +64,7 @@ int echo(char **argv)
 	return (0);
 }
 
-int cd(char **argv)
+int	cd(char **argv)
 {
 	if (!argv[1])
 		return (ft_putendl_fd("missing path", 2), 1);
