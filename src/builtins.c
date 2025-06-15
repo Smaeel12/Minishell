@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 19:25:14 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/14 21:52:36 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/15 09:55:34 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,15 +52,20 @@ int echo(char **argv)
 	size_t j;
 
 	i = 1;
-	j = 0;
 	newline = 1;
-	while (argv[i] && argv[i][0] == '-' && argv[i][j] == 'n')
-		j++;
-	if (argv[i] && !argv[i][j])
-		newline = 0;
 	while (argv[i])
 	{
-		printf("%s", argv[i++]);
+		j = 0;
+		while (argv[i] && argv[i][0] == '-' && argv[i][++j] == 'n')
+			;
+		if ((argv[i] && argv[i][j] != '\0' && j > 1) || argv[i][0] != '-')
+			break;
+		newline = 0;
+		i++;
+	}
+	while (argv[i])
+	{
+		ft_putstr_fd(argv[i++], 1);
 		write(1, " ", !!argv[i]);
 	}
 	write(1, "\n", newline);

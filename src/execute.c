@@ -6,24 +6,11 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/14 21:51:59 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/15 08:59:10 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
-
-int init_child(int *streams)
-{
-	dup2(streams[IN], IN);
-	dup2(streams[OUT], OUT);
-	signal(SIGINT, SIG_DFL);
-	signal(SIGQUIT, SIG_DFL);
-	if (streams[UNUSED] != -1)
-		close(streams[UNUSED]);
-	close(streams[OUT]);
-	close(streams[IN]);
-	return (0);
-}
 
 int find_command(t_cmd *cmd, char **paths, t_cmd builtins[])
 {
@@ -66,7 +53,7 @@ int open_streams(struct s_redirections *redirections, int *streams)
 		{
 			streams[IN] = open("temp_pipe_file", O_CREAT | O_WRONLY | O_TRUNC,
 							   0644);
-			while (true)
+			while (streams[IN] != -1)
 			{
 				line = readline("heredoc> ");
 				if (!line)
@@ -76,21 +63,16 @@ int open_streams(struct s_redirections *redirections, int *streams)
 		}
 		if (redirections[i].type == INRDR)
 		{
-			close(streams[IN]);
 			streams[IN] = open(redirections[i].filename, O_RDONLY);
 		}
 		if (redirections[i].type == OUTRDR)
-		{
-			close(streams[OUT]);
 			streams[OUT] = open(redirections[i].filename,
 								O_CREAT | O_WRONLY | O_TRUNC, 0644);
-		}
 		if (redirections[i].type == APPEND)
-		{
-			close(streams[OUT]);
 			streams[OUT] = open(redirections[i].filename,
 								O_CREAT | O_WRONLY | O_APPEND, 0644);
-		}
+		if (streams[IN] == -1 || streams[OUT] == -1)
+			return (1);
 		i++;
 	}
 	return (0);
@@ -101,23 +83,32 @@ int execute_command(struct s_command command, char **paths, int *streams)
 	t_cmd cmd;
 	pid_t pid;
 
+	if (open_streams(command.redirections, streams))
+		return (g_data.exit_status = 1 << 8, 1);
 	cmd = (t_cmd){command.arguments[0], NULL};
-	open_streams(command.redirections, streams);
 	find_command(&cmd, paths, (t_cmd[]){{"echo", echo}, {"cd", cd}, {"pwd", pwd}, {"export", export}, {"unset", unset}, {"env", env}, {"exit", bexit}, {NULL, NULL}});
-	if (cmd.func == cd || cmd.func == export || cmd.func == unset || cmd.func == bexit)
-		return (cmd.func(command.arguments), free(cmd.path), 0);
+	if (streams[UNUSED] == -1 && (cmd.func == cd || cmd.func == export || cmd.func == bexit || cmd.func == unset))
+		return (free(cmd.path), g_data.exit_status = cmd.func(command.arguments) << 8, 1);
 	pid = fork();
 	if (pid == -1)
 		return (ft_putendl_fd("Can't create a Child", 2), 1);
-	if (pid == 0)
-	{
-		init_child(streams);
-		if (cmd.func)
-			return (cmd.func(command.arguments), free(cmd.path), exit(0), 0);
-		execve(cmd.path, command.arguments, g_data.environs);
-		return (perror(command.arguments[0]), free(cmd.path), exit(126), 0);
-	}
-	return (free(cmd.path), 0);
+	if (pid > 0)
+		return (free(cmd.path), 0);
+	if (streams[UNUSED])
+		close(streams[UNUSED]);
+	signal(SIGQUIT, SIG_DFL);
+	signal(SIGINT, SIG_DFL);
+	dup2(streams[OUT], OUT);
+	dup2(streams[IN], IN);
+	close(streams[OUT]);
+	close(streams[IN]);
+	if (cmd.func)
+		exit(cmd.func(command.arguments));
+	execve(cmd.path, command.arguments, g_data.environs);
+	free(cmd.path);
+	if (errno == ENONET)
+		return (perror(command.arguments[0]), exit(126), 0);
+	return (perror(command.arguments[0]), exit(127), 0);
 }
 
 int execute_pipeline(t_tree *tree, char **paths, int *streams)
@@ -132,12 +123,10 @@ int execute_pipeline(t_tree *tree, char **paths, int *streams)
 			return (1);
 		execute_pipeline(tree->operator.left, paths, (int[]){streams[IN], pipefds[OUT], pipefds[IN]});
 		execute_pipeline(tree->operator.right, paths, (int[]){pipefds[IN], streams[OUT], pipefds[OUT]});
-		close(streams[OUT]);
-		close(streams[IN]);
 		close(pipefds[OUT]);
 		close(pipefds[IN]);
 		wait(NULL);
 		return (0);
 	}
-	return (execute_command(tree->command, paths, streams), 0);
+	return (execute_command(tree->command, paths, streams));
 }
