@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/15 07:37:45 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/17 15:39:34 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,54 +17,49 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include "../libft/libft.h"
-#include <sys/resource.h>
 #include <sys/wait.h>
 #include <stdbool.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <signal.h>
-#include <limits.h>
-#include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
 
 /** DEFINITIONS */
-#define EXPECTED_VALID_FILENAME "Expected a valid filename for redirection"
-#define INV_RDR_FILE "Invalid Redirection File the file should be a word"
-#define MISSING_FILENAME "Missing filename for redirection"
+#define HEREDOC_FILE ".tmp_heredoc_file.txt"
+#define CREATE_PIPE_ERROR "Can't create a pipe"
 #define MALLOC_FAILED "Memory allocation failed"
-#define INV_PIPE "Incomplete/Invalid Pipe"
-#define INV_RDR "Invalid Redirection"
-#define QTS_ERR "Unclosed Quotes"
-#define VALID_TOKENS "<>()\"'|"
-#define MAX_REDIRECTIONS 80
+#define HEREDOC_ERROR "here-document delimited by end-of-file"
+#define MISSING_FILE_ERROR "Syntax error: Missing filename"
+#define RDR_ERROR "Syntax error: invalid redirection"
+#define QUOTES_ERR "Syntax error: unclosed quotes"
+#define PIPE_ERROR "Syntax error: invalid pipe"
+#define FORK_FAILED "Creating a child failed"
+#define COMMAND_NOT_FOUND ": command not found"
+#define NO_FILE ": no such file or directiory"
+#define TOKEN_CHARSET " \"'|<>"
+#define MAX_REDIRECTIONS 128
 #define MAX_ARGS 128
 
 /** ENUMS **/
-enum e_token_type
+enum e_node
 {
-	SCAN,
+	COMMAND_NODE,
+	OPERATOR_NODE,
+};
+
+enum e_type
+{
+	NONE,
 	WORD,
 	APPEND,
 	HEREDOC,
-	DQTS = '"',
 	PIPE = '|',
+	DQTS = '"',
 	SQTS = '\'',
 	INRDR = '<',
-	ANDOP = '&',
 	OUTRDR = '>',
-	OPARENTHSIS = '(',
-	CPARENTHSIS = ')',
 };
 
-enum e_node_type
-{
-	NONE,
-	NODE_COMMAND,
-	NODE_OPERATOR,
-};
-
-enum
+enum e_streams
 {
 	IN,
 	OUT,
@@ -78,15 +73,15 @@ typedef struct s_cmd
 	int (*func)(char **argv);
 } t_cmd;
 
-typedef struct s_token
+typedef struct
 {
 	char *value;
-	enum e_token_type type;
+	enum e_type type;
 } t_token;
 
 typedef struct s_tree
 {
-	enum e_node_type type;
+	enum e_node type;
 	union
 	{
 		struct
@@ -97,71 +92,66 @@ typedef struct s_tree
 		} operator;
 		struct s_command
 		{
-			char *arguments[MAX_ARGS];
 			struct s_redirections
 			{
-				enum e_token_type type;
-				char *filename;
+				char *file;
+				enum e_type type;
 			} redirections[MAX_REDIRECTIONS];
+			char *arguments[MAX_ARGS];
 			size_t aidx;
 			size_t ridx;
 		} command;
 	};
 } t_tree;
 
-struct s_global_data
+struct
 {
+	char **paths;
 	char **environs;
 	int exit_status;
 	size_t env_size;
-};
-
-/** VARIABLE */
-struct s_global_data g_data;
+} data;
 
 /** PROTOTYPES */
-t_tree *parse_line(void);
+int tokenize_cmdline(t_list **lst, char *line);
+t_tree *parse_pipeline(t_list *tokens);
 
-int execute_pipeline(t_tree *tree, char **paths, int *streams);
-
-int add_token(t_list **lst, enum e_token_type state, enum e_token_type cstate, char *line, size_t len);
-char *create_line(char **strs, size_t nstrs);
-int is_valid_token(t_token *token);
-char *expand_line(t_token *token);
-
-void clear_token(void *arg);
-int clear_tree(t_tree *tree);
-int clear_paths(char **paths);
-int clear_env(void);
-
-int init_signals(void);
-
-int export(char **argv);
-int unset(char **argv);
-int bexit(char **argv);
-int echo(char **argv);
-int env(char **argv);
-int pwd(char **argv);
-int cd(char **argv);
+int execute_pipeline(t_tree *tree, int *streams);
 
 int set_env(char *key, char *value);
-char *get_env(char *key);
 int unset_env(char *key);
+char *get_env(char *key);
 int print_env(void);
 int init_env(void);
 
-/// DEBUGG
-void ft_puts(void *arg);
-void print_tree(t_tree *tree);
+void clear_token(void *arg);
+int clear_tree(t_tree *tree);
+int clear_array(char **array);
 
-/** INLINE FUNCS */
-static inline enum e_token_type advance(char c)
+int add_token(t_list **lst, enum e_type state, char *line, size_t idx);
+char *create_line(char **strs, size_t nstrs);
+char *concatenate_string(char *line);
+int expand_line(char **result, char *line);
+
+int open_redirections(struct s_redirections *rdrs, int *streams);
+
+int ft_export(char **argv);
+int ft_unset(char **argv);
+int ft_exit(char **argv);
+int ft_echo(char **argv);
+int ft_env(char **argv);
+int ft_pwd(char **argv);
+int ft_cd(char **argv);
+
+int init_signals(void);
+
+static inline enum e_type determine_token(char c)
 {
-	if (ft_strchr(VALID_TOKENS, c))
-		return (c);
-	if (c && c != ' ')
-		return (WORD);
-	return (SCAN);
+	if (c == ' ' || c == '\0')
+		return NONE;
+	if (c == '<' || c == '>' || c == '|' || c == '\"' || c == '\'')
+		return c;
+	return WORD;
 }
 
 #endif

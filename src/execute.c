@@ -6,128 +6,93 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/15 10:37:08 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/17 15:43:27 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int find_command(t_cmd *cmd, char **paths, t_cmd builtins[])
+int	find_command(t_cmd *cmd, t_cmd *builtins)
 {
-	char *cmd_path;
-	size_t i;
+	size_t	path_len;
+	size_t	cmd_len;
+	char	*path;
+	int		i;
 
-	i = 0;
-	cmd_path = ft_strdup(cmd->path);
-	while (builtins[i].path && builtins[i].func)
+	i = -1;
+	cmd_len = ft_strlen(cmd->path);
+	while (builtins[++i].path)
+		if (!ft_strncmp(builtins[i].path, cmd->path, cmd_len + 1))
+			return (cmd->func = builtins[i].func, 0);
+	if (cmd->path[0] == '/' || !ft_strncmp(cmd->path, "./", 2))
+		return (0);
+	i = -1;
+	while (data.paths[++i])
 	{
-		if (!(ft_strncmp(cmd_path, builtins[i].path, ft_strlen(cmd_path))))
-			return (cmd->path = cmd_path, cmd->func = builtins[i].func, 0);
-		i++;
+		path_len = ft_strlen(data.paths[i]);
+		path = (char *)malloc((path_len + cmd_len + 2) * sizeof(char));
+		ft_strlcpy(path, data.paths[i], path_len + 1);
+		ft_strlcpy(path + path_len, "/", 2);
+		ft_strlcpy(path + path_len + 1, cmd->path, cmd_len + 1);
+		if (!access(path, F_OK | X_OK))
+			return (free(cmd->path), cmd->path = path, 0);
+		free(path);
 	}
-	i = 0;
-	if (cmd_path[0] == '/' || !ft_strncmp(cmd_path, "./", 2))
-		return (cmd->path = cmd_path, cmd->func = NULL, 0);
-	while (paths[i])
-	{
-		free(cmd_path);
-		cmd_path = create_line((char *[]){ft_strdup(paths[i]), ft_strdup("/"),
-										  ft_strdup(cmd->path)},
-							   3);
-		if (!access(cmd_path, X_OK | F_OK))
-			return (cmd->path = cmd_path, cmd->func = NULL, 0);
-		i++;
-	}
-	return (free(cmd_path), cmd->path = NULL, cmd->func = NULL, 1);
+	return (ft_putstr_fd(cmd->path, 2), ft_putendl_fd(COMMAND_NOT_FOUND, 2), 1);
 }
 
-int open_streams(struct s_redirections *redirections, int *streams)
+int	execute_command(t_cmd *cmd, t_cmd *builtins, char **arguments, int *streams)
 {
-	char *line;
-	size_t i;
+	pid_t	pid;
 
-	i = 0;
-	while (redirections[i].filename)
-	{
-		if (redirections[i].type == HEREDOC)
-		{
-			streams[IN] = open("temp_pipe_file", O_CREAT | O_WRONLY | O_TRUNC,
-							   0644);
-			while (streams[IN] != -1)
-			{
-				line = readline("heredoc> ");
-				if (!line)
-					break;
-				ft_putendl_fd(line, streams[IN]);
-			}
-		}
-		if (redirections[i].type == INRDR)
-			streams[IN] = open(redirections[i].filename, O_RDONLY);
-		if (redirections[i].type == OUTRDR)
-			streams[OUT] = open(redirections[i].filename,
-								O_CREAT | O_WRONLY | O_TRUNC, 0644);
-		if (redirections[i].type == APPEND)
-			streams[OUT] = open(redirections[i].filename,
-								O_CREAT | O_WRONLY | O_APPEND, 0644);
-		if (streams[IN] == -1 || streams[OUT] == -1)
-			return (1);
-		i++;
-	}
-	return (0);
-}
-
-int execute_command(struct s_command command, char **paths, int *streams)
-{
-	t_cmd cmd;
-	pid_t pid;
-
-	if (open_streams(command.redirections, streams))
-		return (g_data.exit_status = 1 << 8, 1);
-	cmd = (t_cmd){command.arguments[0], NULL};
-	find_command(&cmd, paths, (t_cmd[]){{"echo", echo}, {"cd", cd}, {"pwd", pwd}, {"export", export}, {"unset", unset}, {"env", env}, {"exit", bexit}, {NULL, NULL}});
-	if (streams[UNUSED] == -1 && (cmd.func == cd || cmd.func == export || cmd.func == bexit || cmd.func == unset))
-		return (free(cmd.path),
-				g_data.exit_status = cmd.func(command.arguments) << 8, 1);
+	find_command(cmd, builtins);
+	if (cmd->func && streams[UNUSED] == -1)
+		return (data.exit_status = cmd->func(arguments) << 8, free(cmd->path),
+			0);
 	pid = fork();
-	if (pid == -1)
-		return (ft_putendl_fd("Can't create a Child", 2), 1);
+	if (pid < 0)
+		return (free(cmd->path), ft_putendl_fd(FORK_FAILED, 2), 1);
 	if (pid > 0)
-		return (free(cmd.path), 0);
+		return (free(cmd->path), close(streams[IN]), close(streams[OUT]), 1);
 	if (streams[UNUSED] != -1)
 		close(streams[UNUSED]);
-	signal(SIGQUIT, SIG_DFL);
-	signal(SIGINT, SIG_DFL);
 	dup2(streams[OUT], OUT);
 	dup2(streams[IN], IN);
 	close(streams[OUT]);
 	close(streams[IN]);
-	if (cmd.func)
-		exit(cmd.func(command.arguments));
-	execve(cmd.path, command.arguments, g_data.environs);
-	free(cmd.path);
-	if (errno == ENONET)
-		return (perror(command.arguments[0]), exit(126), 0);
-	return (perror(command.arguments[0]), exit(127), 0);
+	if (cmd->func)
+		return (free(cmd->path), exit(cmd->func(arguments)), 0);
+	if (!(cmd->path[0] == '/' || !ft_strncmp(cmd->path, "./", 2)))
+		return (free(cmd->path), exit(127), 1);
+	execve(cmd->path, arguments, data.environs);
+	perror(arguments[0]);
+	return (free(cmd->path), exit(127 - !(errno == ENONET)), 1);
 }
 
-int execute_pipeline(t_tree *tree, char **paths, int *streams)
+int	execute_pipeline(t_tree *tree, int *streams)
 {
-	int pipefds[2];
+	int		pipefds[2];
+	t_cmd	cmd;
 
-	if (!tree || !tree->type)
+	if (!tree)
 		return (0);
-	if (tree->type == NODE_OPERATOR)
+	if (tree->type == OPERATOR_NODE)
 	{
 		if (pipe(pipefds) == -1)
-			return (1);
-		execute_pipeline(tree->operator.left, paths, (int[]){streams[IN], pipefds[OUT], pipefds[IN]});
-		execute_pipeline(tree->operator.right, paths, (int[]){pipefds[IN], streams[OUT], pipefds[OUT]});
-		close(streams[OUT]);
+			return (ft_putendl_fd(CREATE_PIPE_ERROR, 2), 1);
+		execute_pipeline(tree->operator.left,
+			(int []){streams[IN], pipefds[OUT], pipefds[IN]});
+		execute_pipeline(tree->operator.right,
+			(int []){pipefds[IN], streams[OUT], pipefds[OUT]});
 		close(pipefds[OUT]);
-		close(streams[IN]);
 		close(pipefds[IN]);
-		wait(NULL);
 		return (0);
 	}
-	return (execute_command(tree->command, paths, streams));
+	if (open_redirections(tree->command.redirections, streams) == -1)
+		return (data.exit_status = 1 << 8, 1);
+	cmd = (t_cmd){ft_strdup(tree->command.arguments[0]), NULL};
+	execute_command(&cmd, (t_cmd []){{"echo", ft_echo}, {"cd", ft_cd}, {"pwd",
+		ft_pwd}, {"export", ft_export}, {"unset", ft_unset}, {"env", ft_env},
+	{"exit", ft_exit}, {NULL, NULL}}, tree->command.arguments, streams);
+	return (0);
 }

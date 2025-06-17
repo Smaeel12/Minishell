@@ -12,6 +12,8 @@
         "utility": "c",
         "stdio.h": "c",
         "unistd.h": "c",
-        "typeinfo": "c"
+        "typeinfo": "c",
+        "stdbool.h": "c",
+        "libft.h": "c"
     }
 }

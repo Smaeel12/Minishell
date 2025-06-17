@@ -2,8 +2,9 @@ CC = cc
 NAME = minishell
 INCLUDE = include/main.h
 CFLAGS = -Wall -Wextra -Werror -g3 #-fsanitize=address
-SRCS = $(addprefix src/, parser.c parser_utils.c execute.c resource_cleanup.c \
-	signals.c builtins.c builtins_add.c environement_utils.c) minishell.c
+SRCS = minishell.c $(addprefix src/, parser.c execute.c builtins.c signals.c\
+					env_utils.c parser_utils.c execute_utils.c builtins_add.c\
+					resource_cleanup.c)
 OBJS = $(SRCS:%.c=objs/%.o)
 
 objs/%.o: %.c
@@ -12,7 +13,7 @@ objs/%.o: %.c
 
 all: $(NAME)
 
-$(NAME): $(OBJS)
+$(NAME): $(OBJS) $(INCLUDE)
 	make -C libft
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) -Llibft -lft -lreadline -ltermcap
 

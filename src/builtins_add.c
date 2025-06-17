@@ -6,13 +6,13 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 22:04:01 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/13 22:53:06 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/17 06:11:55 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	unset(char **argv)
+int	ft_unset(char **argv)
 {
 	char	*key;
 
@@ -21,7 +21,7 @@ int	unset(char **argv)
 	return (0);
 }
 
-int	export(char **argv)
+int	ft_export(char **argv)
 {
 	char	**key_value;
 

@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 18:13:59 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/13 15:36:16 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/17 06:53:56 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,12 +30,12 @@ int	clear_tree(t_tree *tree)
 	j = 0;
 	if (tree == NULL)
 		return (0);
-	if (tree->type == NODE_COMMAND)
+	if (tree->type == COMMAND_NODE)
 	{
 		while (tree->command.arguments[i])
 			free(tree->command.arguments[i++]);
-		while (tree->command.redirections[j].filename)
-			free(tree->command.redirections[j++].filename);
+		while (tree->command.redirections[j].file)
+			free(tree->command.redirections[j++].file);
 		free(tree);
 		return (0);
 	}
@@ -45,27 +45,13 @@ int	clear_tree(t_tree *tree)
 	return (0);
 }
 
-int	clear_paths(char **paths)
+int	clear_array(char **array)
 {
 	size_t	i;
 
 	i = 0;
-	while (paths[i])
-		free(paths[i++]);
-	free(paths);
-	return (0);
-}
-
-int	clear_env(void)
-{
-	size_t	i;
-
-	i = 0;
-	while (g_data.environs && g_data.environs[i])
-	{
-		free(g_data.environs[i]);
-		i++;
-	}
-	free(g_data.environs);
+	while (array && array[i])
+		free(array[i++]);
+	free(array);
 	return (0);
 }

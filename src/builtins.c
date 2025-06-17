@@ -6,28 +6,29 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 19:25:14 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/15 09:57:32 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/17 06:55:11 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	bexit(char **argv)
+int	ft_exit(char **argv)
 {
-	clear_env();
+	clear_array(data.paths);
+	clear_array(data.environs);
 	if (argv[1])
 		exit(ft_atoi(argv[1]));
 	exit(0);
 }
 
-int	env(char **argv)
+int	ft_env(char **argv)
 {
 	(void)argv;
 	print_env();
 	return (0);
 }
 
-int	pwd(char **argv)
+int	ft_pwd(char **argv)
 {
 	char	*buf;
 
@@ -37,7 +38,7 @@ int	pwd(char **argv)
 	return (0);
 }
 
-int	echo(char **argv)
+int	ft_echo(char **argv)
 {
 	size_t	newline;
 	size_t	i;
@@ -64,7 +65,7 @@ int	echo(char **argv)
 	return (0);
 }
 
-int	cd(char **argv)
+int	ft_cd(char **argv)
 {
 	if (!argv[1])
 		return (ft_putendl_fd("missing path", 2), 1);
