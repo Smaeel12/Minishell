@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 18:13:59 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/17 06:53:56 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/18 07:40:48 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,15 +32,15 @@ int	clear_tree(t_tree *tree)
 		return (0);
 	if (tree->type == COMMAND_NODE)
 	{
-		while (tree->command.arguments[i])
-			free(tree->command.arguments[i++]);
-		while (tree->command.redirections[j].file)
-			free(tree->command.redirections[j++].file);
+		while (tree->s_command.arguments[i])
+			free(tree->s_command.arguments[i++]);
+		while (tree->s_command.redirections[j].file)
+			free(tree->s_command.redirections[j++].file);
 		free(tree);
 		return (0);
 	}
-	clear_tree(tree->operator.left);
-	clear_tree(tree->operator.right);
+	clear_tree(tree->s_operator.left);
+	clear_tree(tree->s_operator.right);
 	free(tree);
 	return (0);
 }

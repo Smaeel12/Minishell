@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 19:25:14 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/17 06:55:11 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/18 07:40:20 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,8 +14,8 @@
 
 int	ft_exit(char **argv)
 {
-	clear_array(data.paths);
-	clear_array(data.environs);
+	clear_array(s_data.paths);
+	clear_array(s_data.environs);
 	if (argv[1])
 		exit(ft_atoi(argv[1]));
 	exit(0);
