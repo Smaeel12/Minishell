@@ -6,17 +6,17 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 01:00:00 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/20 10:54:04 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/20 11:20:46 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int wait_processes(void)
+int	wait_processes(void)
 {
-	int last_pid;
-	int status;
-	int pid;
+	int	last_pid;
+	int	status;
+	int	pid;
 
 	pid = 0;
 	last_pid = 0;
@@ -24,22 +24,22 @@ int wait_processes(void)
 	{
 		pid = wait(&status);
 		if (pid == -1)
-			break;
+			break ;
 		if (last_pid < pid)
 		{
-			s_data.exit_status = status;
+			g_data.exit_status = status;
 			last_pid = pid;
 		}
 	}
 	return (0);
 }
 
-int find_command(t_cmd *cmd, t_cmd *builtins)
+int	find_command(t_cmd *cmd, t_cmd *builtins)
 {
-	size_t path_len;
-	size_t cmd_len;
-	char *path;
-	int i;
+	size_t	path_len;
+	size_t	cmd_len;
+	char	*path;
+	int		i;
 
 	i = -1;
 	cmd_len = ft_strlen(cmd->path);
@@ -49,11 +49,11 @@ int find_command(t_cmd *cmd, t_cmd *builtins)
 	if (cmd->path[0] == '/' || !ft_strncmp(cmd->path, "./", 2))
 		return (0);
 	i = -1;
-	while (cmd->path[0] && s_data.paths[++i])
+	while (cmd->path[0] && g_data.paths[++i])
 	{
-		path_len = ft_strlen(s_data.paths[i]);
+		path_len = ft_strlen(g_data.paths[i]);
 		path = (char *)malloc((path_len + cmd_len + 2) * sizeof(char));
-		ft_strlcpy(path, s_data.paths[i], path_len + 1);
+		ft_strlcpy(path, g_data.paths[i], path_len + 1);
 		ft_strlcpy(path + path_len, "/", 2);
 		ft_strlcpy(path + path_len + 1, cmd->path, cmd_len + 1);
 		if (!access(path, F_OK | X_OK))
@@ -63,11 +63,11 @@ int find_command(t_cmd *cmd, t_cmd *builtins)
 	return (ft_putstr_fd(cmd->path, 2), ft_putendl_fd(COMMAND_NOT_FOUND, 2), 1);
 }
 
-static int open_heredoc(char *delem)
+static int	open_heredoc(char *delem)
 {
-	size_t delem_len;
-	char *line;
-	int fd;
+	size_t	delem_len;
+	char	*line;
+	int		fd;
 
 	delem_len = ft_strlen(delem);
 	fd = open(HEREDOC_FILE, O_TRUNC | O_WRONLY | O_CREAT, 0644);
@@ -77,7 +77,7 @@ static int open_heredoc(char *delem)
 		if (!line)
 			return (ft_putendl_fd(HEREDOC_ERROR, 2), close(fd), -1);
 		if (!ft_strncmp(line, delem, delem_len + 1))
-			break;
+			break ;
 		ft_putendl_fd(line, fd);
 		free(line);
 	}
@@ -86,9 +86,9 @@ static int open_heredoc(char *delem)
 	return (fd);
 }
 
-int open_redirections(struct s_redirections *rdrs, int *fds)
+int	open_redirections(struct s_redirections *rdrs, int *fds)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (rdrs[i].file)
