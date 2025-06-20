@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/18 11:21:56 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/20 09:44:27 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,8 +59,7 @@ static int	parse_redirection(t_tree *node, t_list **tokens)
 	*tokens = (*tokens)->next;
 	if (!*tokens || ((t_token *)(*tokens)->content)->type != WORD)
 		return (ft_putendl_fd(MISSING_FILE_ERROR, 2), 1);
-	expand_line(&node->s_command.redirections[node->s_command.ridx++].file,
-		((t_token *)(*tokens)->content)->value);
+	node->s_command.redirections[node->s_command.ridx++].file = expand_line(((t_token *)(*tokens)->content)->value);
 	*tokens = (*tokens)->next;
 	return (0);
 }
@@ -78,12 +77,11 @@ static t_tree	*parse_command(t_list **tokens)
 	while (*tokens && ((t_token *)(*tokens)->content)->type != PIPE)
 	{
 		if ((((t_token *)(*tokens)->content)->type == OUTRDR
-			|| ((t_token *)(*tokens)->content)->type == INRDR)
+				|| ((t_token *)(*tokens)->content)->type == INRDR)
 			&& parse_redirection(node, tokens))
 			return (free(node), NULL);
 		else
-			expand_line(&node->s_command.arguments[node->s_command.aidx++],
-				((t_token *)(*tokens)->content)->value);
+			node->s_command.arguments[node->s_command.aidx++] = expand_line(((t_token *)(*tokens)->content)->value);
 		*tokens = (*tokens)->next;
 	}
 	node->type = COMMAND_NODE;
