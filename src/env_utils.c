@@ -6,23 +6,22 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:50:42 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/18 07:40:34 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/19 12:36:25 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	unset_env(char *key)
+int unset_env(char *key)
 {
-	size_t	key_len;
-	size_t	i;
+	size_t key_len;
+	size_t i;
 
 	i = 0;
 	key_len = ft_strlen(key);
 	while (s_data.environs[i])
 	{
-		if (!ft_strncmp(s_data.environs[i], key, key_len)
-			|| s_data.environs[i][key_len] == '=')
+		if (!ft_strncmp(s_data.environs[i], key, key_len) || s_data.environs[i][key_len] == '=')
 		{
 			free(s_data.environs[i]);
 			while (s_data.environs[i++])
@@ -36,53 +35,52 @@ int	unset_env(char *key)
 	return (0);
 }
 
-int	set_env(char *key, char *value)
+int set_env(char *new_var)
 {
-	char	**new_array;
-	size_t	key_len;
-	char	*new_env;
-	int		i;
+	char **new_array;
+	size_t key_len;
+	char *key;
+	int i;
 
 	i = -1;
+	key = ft_substr(new_var, 0, new_var - ft_strchr(new_var, '='));
 	key_len = ft_strlen(key);
-	new_env = create_line((char *[]){key, ft_strdup("="), value}, 3);
-	while (s_data.environs[i] && !(!ft_strncmp(s_data.environs[i], key, key_len)
-			&& s_data.environs[i][key_len] == '='))
+	while (s_data.environs[i] && !(!ft_strncmp(s_data.environs[i], key, key_len) && s_data.environs[i][key_len] == '='))
 		i++;
+	free(key);
 	if (s_data.environs[i])
-		return (free(s_data.environs[i]), s_data.environs[i] = new_env, 0);
+		return (free(s_data.environs[i]), s_data.environs[i] = new_var, 0);
 	i = -1;
 	new_array = malloc((s_data.env_size + 2) * sizeof(char *));
 	ft_bzero(new_array, (s_data.env_size + 2) * sizeof(char *));
 	while (s_data.environs[++i])
 		new_array[i] = s_data.environs[i];
+	new_array[i] = new_var;
 	s_data.env_size += 1;
 	free(s_data.environs);
-	new_array[i] = new_env;
 	s_data.environs = new_array;
 	return (0);
 }
 
-char	*get_env(char *key)
+char *get_env(char *key)
 {
-	size_t	key_len;
-	size_t	i;
+	size_t key_len;
+	size_t i;
 
 	i = 0;
 	key_len = ft_strlen(key);
 	if (key[i] == '?')
 		return (ft_itoa(WEXITSTATUS(s_data.exit_status)));
-	while (s_data.environs[i] && !(!ft_strncmp(s_data.environs[i], key, key_len)
-			&& s_data.environs[i][key_len] == '='))
+	while (s_data.environs[i] && !(!ft_strncmp(s_data.environs[i], key, key_len) && s_data.environs[i][key_len] == '='))
 		i++;
 	if (s_data.environs[i])
 		return (ft_strdup(&s_data.environs[i][key_len + 1]));
 	return (NULL);
 }
 
-int	print_env(void)
+int print_env(void)
 {
-	size_t	i;
+	size_t i;
 
 	i = 0;
 	while (s_data.environs && s_data.environs[i])
@@ -90,11 +88,11 @@ int	print_env(void)
 	return (0);
 }
 
-int	init_env(void)
+int init_env(void)
 {
-	extern char	**environ;
-	size_t		size;
-	size_t		i;
+	extern char **environ;
+	size_t size;
+	size_t i;
 
 	i = 0;
 	size = 0;

@@ -6,15 +6,15 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/16 15:14:50 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/19 14:12:01 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	add_token(t_list **lst, enum e_type state, char *line, size_t idx)
+int add_token(t_list **lst, enum e_type state, char *line, size_t idx)
 {
-	t_token	*token;
+	t_token *token;
 
 	if (state == NONE)
 		return (0);
@@ -27,80 +27,52 @@ int	add_token(t_list **lst, enum e_type state, char *line, size_t idx)
 	return (0);
 }
 
-char	*create_line(char **strs, size_t nstrs)
+char *ft_strjoin_helper(char *s1, char *s2)
 {
-	size_t	total_len;
-	size_t	offset;
-	char	*result;
-	size_t	i;
+	char *result;
 
-	i = -1;
-	total_len = 0;
-	while (++i < nstrs)
-	{
-		if (strs[i])
-			total_len += ft_strlen(strs[i]);
-	}
-	i = -1;
-	offset = 0;
-	result = (char *)malloc((total_len + 1) * sizeof(char));
-	if (!result)
-		return (NULL);
-	while (++i < nstrs)
-	{
-		if (strs[i])
-			offset += ft_strlcpy(result + offset, strs[i], ft_strlen(strs[i])
-					+ 1);
-		free(strs[i]);
-	}
-	return (result[total_len] = '\0', result);
+	if (!s1)
+		return (s2);
+	if (!s2)
+		return (s1);
+	result = ft_strjoin(s1, s2);
+	return (free(s1), free(s2), result);
 }
 
-char	*concatenate_string(char *line)
+char *expand_line(char *line)
 {
-	char	*command;
-	size_t	len;
-	size_t	i;
-	size_t	j;
+	size_t i = 0;
+	size_t start = 0;
+	size_t shift = 0;
+	char *key = NULL;
+	char *result = NULL;
 
-	i = 0;
-	j = 0;
-	len = ft_strlen(line);
-	command = (char *)malloc((len + 1) * sizeof(char));
-	while (i < len)
+	while (line[i++])
 	{
-		while (line[i] == '\'' || line[i] == '"')
-			i++;
-		command[j++] = line[i++];
-	}
-	command[j] = '\0';
-	return (free(line), command);
-}
+		shift = 0;
 
-int	expand_line(char **result, char *line)
-{
-	char	*key;
-	size_t	start;
-	size_t	i;
-
-	i = 0;
-	while (line[i])
-	{
-		start = i;
-		while (line[start] == SQTS && line[++i] != SQTS)
-			;
-		while (line[++i] && !(line[i - 1] == '$' && (ft_isalpha(line[i])
-					|| line[i] == '_' || line[i] == '?')))
-			;
-		key = &line[i];
-		while (*key && line[++i] && (ft_isalnum(line[i]) || line[i] == '_'))
-			;
-		key = ft_substr(key, 0, (&line[i] - key));
-		*result = create_line((char *[]){*result, ft_substr(line, start, i
-					- start - ft_strlen(key) - (*key != '\0')), get_env(key)},
-				3);
-		free(key);
+		if (line[start] != SQTS && line[i - 1] == '$' &&
+			(ft_isalpha(line[i]) || line[i] == '_' || line[i] == '?'))
+		{
+			key = &line[i];
+			shift = line[start] == DQTS || line[start] == SQTS;
+			result = ft_strjoin_helper(result,
+									   ft_substr(line, start + shift, i - start - 1));
+			while (line[++i] && (ft_isalnum(line[i]) || line[i] == '_'))
+				;
+			key = ft_substr(key, 0, (&line[i] - key));
+			result = ft_strjoin_helper(result, get_env(key));
+			start = i + shift;
+		}
+		if (line[i] == '\0' || line[i] == SQTS || line[i] == DQTS)
+		{
+			if ((line[i] == '\0' && i <= start) || line[start] != line[i])
+				continue;
+			shift = line[start] == DQTS || line[start] == SQTS;
+			result = ft_strjoin_helper(result,
+									   ft_substr(line, start + shift, (i - start - shift)));
+			start = i + shift;
+		}
 	}
-	*result = concatenate_string(*result);
 	return (0);
 }
