@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/20 18:57:45 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/21 21:46:06 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,34 +27,39 @@ int add_token(t_list **lst, enum e_type state, char *line, size_t idx)
 	return (0);
 }
 
-int concatenate_string(char **result, char *key, char *segment)
+int append_string(char **result, char *segment)
 {
-	size_t seg_len;
-	size_t val_len;
-	char *value;
-	char *new;
+	char *new_res;
 
-	val_len = 0;
-	value = get_env(key);
-	seg_len = ft_strlen(segment);
-	if (value)
-		val_len = ft_strlen(value);
-	new = malloc((seg_len + val_len + 1) * sizeof(char));
-	if (!new)
-		return (1);
-	ft_strlcpy(new, segment, seg_len + 1);
-	if (value)
+	if (!segment)
+		return (0);
+	if (*result)
 	{
-		ft_strlcpy(new + seg_len, value, val_len + 1);
-		free(value);
+		new_res = ft_strjoin(*result, segment);
+		free(*result);
+		free(segment);
+		segment = new_res;
 	}
-	free(segment);
-	*result = new;
+	*result = segment;
 	return (0);
 }
 
-void expand_line(char **result, char *line)
+int should_skip(char *line, size_t start, size_t end)
 {
+	if (line[start] == SQTS && line[end] != line[start])
+		return (1);
+	if (line[end - 1] == '$' && !(ft_isalpha(line[end]) || line[end] == '_' || line[end] == '?'))
+		return (1);
+	if (line[end - 1] != '$' && line[start] == DQTS && line[end] != line[start])
+		return (1);
+	if (line[end - 1] != '$' && line[end] && line[end] != DQTS && line[end] != SQTS)
+		return (1);
+	return (0);
+}
+
+int expand_line(char **result, char *line)
+{
+	char *key;
 	size_t start;
 	size_t end;
 	size_t i;
@@ -63,16 +68,19 @@ void expand_line(char **result, char *line)
 	start = 0;
 	while (line[i++])
 	{
-		if (line[i - 1] == '$' || !line[i] || line[i] == SQTS || line[i] == DQTS)
-		{
-			end = i;
-			if ((end <= start) || (line[i - 1] != '$' && (line[start] == SQTS || line[start] == DQTS) && line[start] != line[i]) || (line[i - 1] == '$' && (line[start] == SQTS || !(ft_isalpha(line[i]) || line[i] == '_' || line[i] == '?'))))
-				continue;
-			start += line[start] == DQTS || line[start] == SQTS;
-			while (line[i] && (ft_isalnum(line[i]) || line[i] == '_'))
-				i++;
-			concatenate_string(result, ft_substr(line, end, i - end), ft_substr(line, start, end - start - (line[end - 1] == '$')));
-			start = i + (line[start] == DQTS || line[start] == SQTS);
-		}
+		end = i;
+		if (should_skip(line, start, end))
+			continue;
+		key = &line[i];
+		start += (line[start] == DQTS || line[start] == SQTS);
+		while (key[0] && (ft_isalnum(line[i]) || line[i] == '_'))
+			i++;
+		i += (key[0] && key[0] == '?');
+		key = ft_substr(key, 0, (&line[i] - key));
+		append_string(result, ft_substr(line, start, end - start - !!key[0]));
+		append_string(result, get_env(key));
+		i += (line[i] == DQTS || line[i] == SQTS);
+		start = i;
 	}
+	return (0);
 }
