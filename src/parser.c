@@ -6,17 +6,17 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/20 11:19:16 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/20 18:16:25 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	tokenize_cmdline(t_list **lst, char *line)
+int tokenize_cmdline(t_list **lst, char *line)
 {
-	enum e_type	cstate;
-	enum e_type	state;
-	char		*temp;
+	enum e_type cstate;
+	enum e_type state;
+	char *temp;
 
 	temp = line;
 	state = determine_token(*temp);
@@ -28,8 +28,7 @@ int	tokenize_cmdline(t_list **lst, char *line)
 		if ((state == DQTS || state == SQTS) && cstate != state)
 			return (ft_putendl_fd(QUOTES_ERR, 2), ft_lstclear(lst, free), 1);
 		cstate = determine_token(*temp);
-		if (((state == DQTS || state == SQTS || state == WORD)
-				&& (cstate == WORD || cstate == DQTS || cstate == SQTS)))
+		if (((state == DQTS || state == SQTS || state == WORD) && (cstate == WORD || cstate == DQTS || cstate == SQTS)))
 			state = cstate;
 		if (cstate != state)
 		{
@@ -41,9 +40,9 @@ int	tokenize_cmdline(t_list **lst, char *line)
 	return (0);
 }
 
-static int	parse_redirection(t_tree *node, t_list **tokens)
+static int parse_redirection(t_tree *node, t_list **tokens)
 {
-	size_t	len;
+	size_t len;
 
 	len = ft_strlen(((t_token *)(*tokens)->content)->value);
 	if (len > 2)
@@ -59,14 +58,15 @@ static int	parse_redirection(t_tree *node, t_list **tokens)
 	*tokens = (*tokens)->next;
 	if (!*tokens || ((t_token *)(*tokens)->content)->type != WORD)
 		return (ft_putendl_fd(MISSING_FILE_ERROR, 2), 1);
-	node->s_command.redirections[node->s_command.ridx++].file = expand_line(((t_token *)(*tokens)->content)->value);
+	expand_line(&node->s_command.redirections[node->s_command.ridx++].file,
+				((t_token *)(*tokens)->content)->value);
 	*tokens = (*tokens)->next;
 	return (0);
 }
 
-static t_tree	*parse_command(t_list **tokens)
+static t_tree *parse_command(t_list **tokens)
 {
-	t_tree	*node;
+	t_tree *node;
 
 	if (!tokens || !*tokens || ((t_token *)(*tokens)->content)->type == PIPE)
 		return (NULL);
@@ -76,22 +76,21 @@ static t_tree	*parse_command(t_list **tokens)
 	ft_bzero(node, sizeof(t_tree));
 	while (*tokens && ((t_token *)(*tokens)->content)->type != PIPE)
 	{
-		if ((((t_token *)(*tokens)->content)->type == OUTRDR
-				|| ((t_token *)(*tokens)->content)->type == INRDR)
-			&& parse_redirection(node, tokens))
+		if ((((t_token *)(*tokens)->content)->type == OUTRDR || ((t_token *)(*tokens)->content)->type == INRDR) && parse_redirection(node, tokens))
 			return (free(node), NULL);
 		else
-			node->s_command.arguments[node->s_command.aidx++] = expand_line(((t_token *)(*tokens)->content)->value);
+			expand_line(&node->s_command.arguments[node->s_command.aidx++],
+						((t_token *)(*tokens)->content)->value);
 		*tokens = (*tokens)->next;
 	}
 	node->type = COMMAND_NODE;
 	return (node);
 }
 
-t_tree	*parse_pipeline(t_list *tokens)
+t_tree *parse_pipeline(t_list *tokens)
 {
-	t_tree	*right;
-	t_tree	*left;
+	t_tree *right;
+	t_tree *left;
 
 	left = parse_command(&tokens);
 	while (tokens && ((t_token *)tokens->content)->type == PIPE)
@@ -105,8 +104,7 @@ t_tree	*parse_pipeline(t_list *tokens)
 		right->type = OPERATOR_NODE;
 		right->s_operator.left = left;
 		right->s_operator.right = parse_command(&tokens);
-		if (right->s_operator.left == NULL || right->s_operator.right == NULL
-			|| ft_strlen(right->s_operator.value) > 2)
+		if (right->s_operator.left == NULL || right->s_operator.right == NULL || ft_strlen(right->s_operator.value) > 2)
 			return (ft_putendl_fd(PIPE_ERROR, 2), clear_tree(right), NULL);
 		left = right;
 	}

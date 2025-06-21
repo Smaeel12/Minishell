@@ -7,74 +7,82 @@ void print_segment(char *line, size_t start, size_t end)
 	putc('\n', stdout);
 }
 
-char *ft_strjoin_helper(char *s1, char *s2)
-{
-	char *result;
-
-	if (!s1)
-		return (s2);
-	if (!s2)
-		return (s1);
-	result = ft_strjoin(s1, s2);
-	return (free(s1), free(s2), result);
-}
-
 char *get_env(char *key)
 {
 	char *value;
 
+	if (key[0] == '?')
+		return (ft_strdup("0"));
 	value = getenv(key);
 	if (value)
 		return (free(key), ft_strdup(value));
 	return (free(key), NULL);
 }
 
-char *expanding_line(char *line)
+void ft_strjoin_helper(char **result, char *segment)
 {
-	size_t i = 0;
-	size_t start = 0;
-	size_t shift = 0;
-	char *key = NULL;
-	char *result = NULL;
+	char *new_res;
 
+	if (!segment)
+		return;
+	if (*result)
+	{
+		new_res = ft_strjoin(*result, segment);
+		free(*result);
+		free(segment);
+		segment = new_res;
+	}
+	*result = segment;
+}
+
+int expanding_line_v2(char **result, char *line)
+{
+	char *key;
+	size_t start;
+	size_t end;
+	size_t i;
+
+	i = 0;
+	start = 0;
 	while (line[i++])
 	{
-		shift = 0;
-
-		if (line[start] != SQTS && line[i - 1] == '$' &&
-			(ft_isalpha(line[i]) || line[i] == '_' || line[i] == '?'))
-		{
-			key = &line[i];
-			shift = line[start] == DQTS || line[start] == SQTS;
-			result = ft_strjoin_helper(result,
-									   ft_substr(line, start + shift, i - start - 1));
-			while (line[++i] && (ft_isalnum(line[i]) || line[i] == '_'))
-				;
-			key = ft_substr(key, 0, (&line[i] - key));
-			result = ft_strjoin_helper(result, get_env(key));
-			start = i + shift;
-		}
-		if (line[i] == '\0' || line[i] == SQTS || line[i] == DQTS)
-		{
-			if (((line[start] == SQTS || line[start] == DQTS) &&
-				 line[start] != line[i]) ||
-				i <= start)
+		if ((line[start] == DQTS && line[i] != line[start]) ||
+			(line[start] == SQTS && line[i] != line[start]))
+			if (line[start] == SQTS || (line[i - 1] == '$' &&
+										!(ft_isalpha(line[i]) || line[i] == '_' || line[i] == '?')))
 				continue;
-			shift = line[start] == DQTS || line[start] == SQTS;
-			result = ft_strjoin_helper(result,
-									   ft_substr(line, start + shift, i - start - 1));
-			start = i + shift;
-		}
+		if (line[i] &&
+			!(line[i - 1] == '$' || line[i] == SQTS || line[i] == DQTS))
+			continue;
+		end = i;
+		key = &line[i];
+		start += (line[start] == DQTS || line[start] == SQTS);
+		while (key[0] && (ft_isalnum(line[i]) || line[i] == '_'))
+			i++;
+		i += (key[0] && key[0] == '?');
+		key = ft_substr(key, 0, (&line[i] - key));
+		ft_strjoin_helper(result, ft_substr(line, start, end - start - !!key[0]));
+		ft_strjoin_helper(result, get_env(key));
+		start = i + (line[i] == DQTS || line[i] == SQTS);
+		i = start;
 	}
-	return (result);
+	return (0);
 }
 
 int main(int ac, char **av)
 {
+	// char *result1;
+	char *result2;
+
 	if (ac != 2)
 		return (1);
-
-	char *result = expanding_line(av[1]);
-	printf("%s\n", result);
-	free(result);
+	// result1 = NULL;
+	result2 = NULL;
+	// expanding_line(&result1, av[1]);
+	expanding_line_v2(&result2, av[1]);
+	printf("expanding line: %s\n", av[1]);
+	// printf("result line: %s\n", result1);
+	printf("result line: %s\n", result2);
+	// free(result1);
+	free(result2);
 }

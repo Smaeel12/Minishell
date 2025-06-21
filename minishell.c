@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/20 11:37:15 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/20 18:19:02 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,7 +57,6 @@ int main(void)
 		add_history(line);
 		tokenize_cmdline(&tokens, line);
 		tree = parse_pipeline(tokens);
-		print_tree(tree); // debug
 		execute_pipeline(tree, (int[]){dup(IN), dup(OUT), -1});
 		ft_lstclear(&tokens, clear_token);
 		clear_tree(tree);
