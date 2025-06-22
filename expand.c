@@ -1,10 +1,41 @@
-#include "include/main.h"
+#include "libft/libft.h"
+#include <stdio.h>
 
 void print_segment(char *line, size_t start, size_t end)
 {
 	for (size_t j = start; j < end; j++)
 		putc(line[j], stdout);
 	putc('\n', stdout);
+}
+
+char *get_env(char *key);
+int append_string(char **result, char *segment);
+void expand_line(char **result, char *line);
+
+enum e_type
+{
+	NONE,
+	WORD,
+	APPEND,
+	HEREDOC,
+	PIPE = '|',
+	DQTS = '"',
+	SQTS = '\'',
+	INRDR = '<',
+	OUTRDR = '>',
+};
+
+int main(int ac, char **av)
+{
+	char *result;
+
+	if (ac != 2)
+		return (0);
+	result = NULL;
+	expand_line(&result, av[1]);
+	printf("INP: %s\n", av[1]);
+	printf("OUT: %s\n", result);
+	free(result);
 }
 
 char *get_env(char *key)
@@ -19,63 +50,7 @@ char *get_env(char *key)
 	return (free(key), NULL);
 }
 
-int concatenate_result(char **result, char *segment, char *value)
-{
-	char *new_res;
-	size_t idx;
-	size_t len;
-
-	idx = 0;
-	len = ft_strlen(segment);
-	if (value)
-		len += ft_strlen(value);
-	if (*result)
-		len += ft_strlen(*result);
-	new_res = (char *)malloc((len + 1) * sizeof(char));
-	if (!new_res)
-		return (1);
-	if (*result)
-		idx = ft_strlcpy(new_res + idx, *result, ft_strlen(*result) + 1);
-	idx += ft_strlcpy(new_res + idx, segment, ft_strlen(segment) + 1);
-	if (value)
-		idx += ft_strlcpy(new_res + idx, value, ft_strlen(value) + 1);
-	free(value);
-	free(segment);
-	free(*result);
-	*result = new_res;
-	return (0);
-}
-
-// void expanding_line_v2(char **result, char *line)
-// {
-// 	char *key;
-// 	size_t beg;
-// 	size_t i;
-
-// 	i = 0;
-// 	beg = 0;
-// 	while (line[i++])
-// 	{
-// 		if (((line[beg] == DQTS || line[beg] == SQTS) && line[i] != line[beg]))
-// 			if ((line[i - 1] == '$' && !(ft_isalpha(line[i]) || line[i] == '_'
-// || line[i] == '?')) || line[beg] == SQTS)
-// 				continue ;
-// 		if (line[i] && line[i - 1] != '$' && line[i] != SQTS && line[i] != DQTS)
-// 			continue ;
-// 		key = &line[i];
-// 		beg += (line[beg] == DQTS || line[beg] == SQTS);
-// 		while (key[0] && (ft_isalnum(line[i]) || line[i] == '_'))
-// 			i++;
-// 		i += (key[0] && key[0] == '?');
-// 		key = ft_substr(key, 0, (&line[i] - key));
-// 		concatenate_result(result, ft_substr(line, beg, i - ft_strlen(key) - beg
-// - !!key[0]), get_env(key));
-// 		i += (line[i] == DQTS || line[i] == SQTS);
-// 		beg = i;
-// 	}
-// }
-
-int ft_strjoin_helper(char **result, char *segment)
+int append_string(char **result, char *segment)
 {
 	char *new_res;
 
@@ -92,61 +67,43 @@ int ft_strjoin_helper(char **result, char *segment)
 	return (0);
 }
 
-int check_valid(char *line, size_t start, size_t end)
-{
-	if (line[start] == SQTS && line[end] != line[start])
-		return (1);
-	if (line[end - 1] == '$' && !(ft_isalpha(line[end]) || line[end] == '_' || line[end] == '?'))
-		return (1);
-	if (line[end - 1] != '$' && line[start] == DQTS && line[end] != line[start])
-		return (1);
-	if (line[end - 1] != '$' && line[end] && line[end] != DQTS && line[end] != SQTS)
-		return (1);
-	return (0);
-}
-
-int expanding_line_v2(char **result, char *line)
+void expand_line(char **result, char *line)
 {
 	char *key;
+	enum e_type state;
+	size_t keylen;
+	size_t lshift;
+	size_t rshift;
 	size_t start;
-	size_t end;
 	size_t i;
 
 	i = 0;
 	start = 0;
+	state = line[start];
 	while (line[i++])
 	{
-		end = i;
-		if (check_valid(line, start, end))
+		if (state == SQTS && line[i] != (char)state)
+			continue;
+		if (line[i - 1] == '$' && !(ft_isalpha(line[i]) || line[i] == '_' || line[i] == '?'))
+			continue;
+		if (line[i - 1] != '$' && state == DQTS && line[i] != (char)state)
+			continue;
+		if (line[i - 1] != '$' && line[i] && line[i] != DQTS && line[i] != SQTS)
 			continue;
 		key = &line[i];
-		start += (line[start] == DQTS || line[start] == SQTS);
-		while (key[0] && (ft_isalnum(line[i]) || line[i] == '_'))
+		while (line[i] && (ft_isalnum(line[i]) || line[i] == '_'))
 			i++;
 		i += (key[0] && key[0] == '?');
-		key = ft_substr(key, 0, (&line[i] - key));
-		ft_strjoin_helper(result, ft_substr(line, start, end - start - !!key[0]));
-		ft_strjoin_helper(result, get_env(key));
-		i += (line[i] == DQTS || line[i] == SQTS);
+		keylen = (&line[i] - key);
+		key = ft_substr(key, 0, keylen);
+		lshift = (state == SQTS || state == DQTS) && (line[start] == (char)state);
+		rshift = (state == SQTS || state == DQTS) && (line[i] == line[start]);
+		append_string(result,
+					  ft_substr(line, (start + lshift), (i - keylen - !!key[0]) - (start + lshift)));
+		append_string(result, get_env(key));
+		i += rshift;
 		start = i;
+		if (rshift)
+			state = line[i];
 	}
-	return (0);
-}
-
-int main(int ac, char **av)
-{
-	char *result2;
-
-	// char *result1;
-	if (ac != 2)
-		return (1);
-	// result1 = NULL;
-	result2 = NULL;
-	// expanding_line(&result1, av[1]);
-	expanding_line_v2(&result2, av[1]);
-	printf("expanding line: %s\n", av[1]);
-	// printf("result line: %s\n", result1);
-	printf("result line: %s\n", result2);
-	// free(result1);
-	free(result2);
 }
