@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/21 21:46:34 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/22 20:11:27 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -131,7 +131,7 @@ int clear_array(char **array);
 
 int add_token(t_list **lst, enum e_type state,
 			  char *line, size_t idx);
-int expand_line(char **result, char *line);
+void expand_line(char **result, char *line);
 
 int wait_processes(void);
 int find_command(t_cmd *cmd, t_cmd *builtins);
