@@ -12,7 +12,7 @@
 
 #include "../include/main.h"
 
-int ft_exit(char **argv)
+int	ft_exit(char **argv)
 {
 	clear_array(g_data.paths);
 	clear_array(g_data.environs);
@@ -21,16 +21,16 @@ int ft_exit(char **argv)
 	exit(0);
 }
 
-int ft_env(char **argv)
+int	ft_env(char **argv)
 {
 	(void)argv;
 	print_env();
 	return (0);
 }
 
-int ft_pwd(char **argv)
+int	ft_pwd(char **argv)
 {
-	char *buf;
+	char	*buf;
 
 	(void)argv;
 	buf = NULL;
@@ -38,11 +38,11 @@ int ft_pwd(char **argv)
 	return (0);
 }
 
-int ft_echo(char **argv)
+int	ft_echo(char **argv)
 {
-	size_t newline;
-	size_t i;
-	size_t j;
+	size_t	newline;
+	size_t	i;
+	size_t	j;
 
 	i = 1;
 	newline = 1;
@@ -52,7 +52,7 @@ int ft_echo(char **argv)
 		while (argv[i] && argv[i][0] == '-' && argv[i][++j] == 'n')
 			;
 		if ((argv[i] && argv[i][j] != '\0' && j > 1) || argv[i][0] != '-')
-			break;
+			break ;
 		newline = 0;
 		i++;
 	}
@@ -65,7 +65,7 @@ int ft_echo(char **argv)
 	return (0);
 }
 
-int ft_cd(char **argv)
+int	ft_cd(char **argv)
 {
 	if (!argv[1])
 		return (ft_putendl_fd("missing path", 2), 1);

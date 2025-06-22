@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/20 11:20:21 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/22 22:44:07 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,10 +52,10 @@ int	execute_pipeline(t_tree *tree, int *streams)
 	{
 		if (pipe(pipefds) == -1)
 			return (ft_putendl_fd(CREATE_PIPE_ERROR, 2), 1);
-		execute_pipeline(tree->s_operator.left, (int[]){streams[IN],
-			pipefds[OUT], pipefds[IN]});
-		execute_pipeline(tree->s_operator.right, (int[]){pipefds[IN],
-			streams[OUT], pipefds[OUT]});
+		execute_pipeline(tree->s_operator.left,
+			(int []){streams[IN], pipefds[OUT], pipefds[IN]});
+		execute_pipeline(tree->s_operator.right,
+			(int []){pipefds[IN], streams[OUT], pipefds[OUT]});
 		return (0);
 	}
 	if (open_redirections(tree->s_command.redirections, streams) == -1)
@@ -63,6 +63,6 @@ int	execute_pipeline(t_tree *tree, int *streams)
 	cmd = (t_cmd){ft_strdup(tree->s_command.arguments[0]), NULL};
 	execute_command(&cmd, (t_cmd[]){{"echo", ft_echo}, {"cd", ft_cd}, {"pwd",
 		ft_pwd}, {"export", ft_export}, {"unset", ft_unset}, {"env", ft_env},
-		{"exit", ft_exit}, {NULL, NULL}}, tree->s_command.arguments, streams);
+	{"exit", ft_exit}, {NULL, NULL}}, tree->s_command.arguments, streams);
 	return (0);
 }
