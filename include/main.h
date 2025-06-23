@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/22 20:11:27 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/23 16:02:46 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,19 +22,26 @@
 #include <signal.h>
 #include <stdbool.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 
 /** DEFINITIONS */
 #define HEREDOC_FILE ".tmp_heredoc_file.txt"
-#define CREATE_PIPE_ERROR "Can't create a pipe"
-#define MALLOC_FAILED "Memory allocation failed"
 #define HEREDOC_ERROR "here-document delimited by end-of-file"
+
+#define NO_FILE ": no such file or directiory"
+#define NO_PERM ": Permission denied"
+#define NO_CMD ": command not found"
+#define DIR_CMD ": is a directory"
+
 #define MISSING_FILE_ERROR "Syntax error: Missing filename"
 #define RDR_ERROR "Syntax error: invalid redirection"
 #define QUOTES_ERR "Syntax error: unclosed quotes"
 #define PIPE_ERROR "Syntax error: invalid pipe"
+
+#define CREATE_PIPE_ERROR "Can't create a pipe"
+#define MALLOC_FAILED "Memory allocation failed"
 #define FORK_FAILED "Creating a child failed"
-#define COMMAND_NOT_FOUND ": command not found"
-#define NO_FILE ": no such file or directiory"
+
 #define TOKEN_CHARSET " \t\"'|<>"
 #define MAX_REDIRECTIONS 128
 #define MAX_ARGS 128
@@ -134,6 +141,7 @@ int add_token(t_list **lst, enum e_type state,
 void expand_line(char **result, char *line);
 
 int wait_processes(void);
+int check_command(char *path);
 int find_command(t_cmd *cmd, t_cmd *builtins);
 int open_redirections(struct s_redirections *rdrs, int *streams);
 

@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 01:00:00 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/20 11:20:46 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/23 16:02:16 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,25 @@ int	wait_processes(void)
 	return (0);
 }
 
+int	check_command(char *path)
+{
+	struct stat	cmd_stat;
+
+	if (!path[0] || !(path[0] == '/' || !ft_strncmp(path, "./", 2)))
+		return (ft_putstr_fd(path, 2), ft_putendl_fd(NO_CMD, 2), exit(127), 1);
+	if (stat(path, &cmd_stat) == -1)
+		perror(path);
+	if (errno == ENONET)
+		exit(127);
+	if (errno == EACCES)
+		exit(126);
+	if (S_ISDIR(cmd_stat.st_mode))
+		return (ft_putstr_fd(path, 2), ft_putendl_fd(DIR_CMD, 2), exit(126), 1);
+	if (!(cmd_stat.st_mode & S_IXUSR))
+		return (ft_putstr_fd(path, 2), ft_putendl_fd(NO_PERM, 2), exit(126), 1);
+	return (0);
+}
+
 int	find_command(t_cmd *cmd, t_cmd *builtins)
 {
 	size_t	path_len;
@@ -41,13 +60,13 @@ int	find_command(t_cmd *cmd, t_cmd *builtins)
 	char	*path;
 	int		i;
 
+	if (cmd->path[0] == '/' || !ft_strncmp(cmd->path, "./", 2))
+		return (0);
 	i = -1;
 	cmd_len = ft_strlen(cmd->path);
 	while (builtins[++i].path)
 		if (!ft_strncmp(builtins[i].path, cmd->path, cmd_len + 1))
 			return (cmd->func = builtins[i].func, 0);
-	if (cmd->path[0] == '/' || !ft_strncmp(cmd->path, "./", 2))
-		return (0);
 	i = -1;
 	while (cmd->path[0] && g_data.paths[++i])
 	{
@@ -60,7 +79,7 @@ int	find_command(t_cmd *cmd, t_cmd *builtins)
 			return (free(cmd->path), cmd->path = path, 0);
 		free(path);
 	}
-	return (ft_putstr_fd(cmd->path, 2), ft_putendl_fd(COMMAND_NOT_FOUND, 2), 1);
+	return (0);
 }
 
 static int	open_heredoc(char *delem)
