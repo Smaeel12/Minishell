@@ -6,15 +6,15 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/22 22:44:30 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/23 18:46:51 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	add_token(t_list **lst, enum e_type state, char *line, size_t idx)
+int add_token(t_list **lst, enum e_type state, char *line, size_t idx)
 {
-	t_token	*token;
+	t_token *token;
 
 	if (state == NONE)
 		return (0);
@@ -27,9 +27,9 @@ int	add_token(t_list **lst, enum e_type state, char *line, size_t idx)
 	return (0);
 }
 
-int	append_string(char **result, char *segment)
+int append_string(char **result, char *segment)
 {
-	char	*new_res;
+	char *new_res;
 
 	if (!segment)
 		return (0);
@@ -44,27 +44,25 @@ int	append_string(char **result, char *segment)
 	return (0);
 }
 
-int	should_continue(enum e_type state, char *line, size_t i)
+int should_continue(enum e_type state, char *line, size_t i)
 {
 	if (state == SQTS && line[i] && line[i] != (char)state)
 		return (1);
-	if (line[i] != SQTS && line[i] != DQTS && line[i - 1] == '$' && line[i]
-		&& !(ft_isalpha(line[i]) || line[i] == '_' || line[i] == '?'))
+	if (line[i] != SQTS && line[i] != DQTS && line[i - 1] == '$' && line[i] && !(ft_isalpha(line[i]) || line[i] == '_' || line[i] == '?'))
 		return (1);
-	if (line[i - 1] != '$' && line[i] && state == DQTS
-		&& line[i] != (char)state)
+	if (line[i - 1] != '$' && line[i] && state == DQTS && line[i] != (char)state)
 		return (1);
 	if (line[i - 1] != '$' && line[i] && line[i] != DQTS && line[i] != SQTS)
 		return (1);
 	return (0);
 }
 
-void	expand_line(char **result, char *line)
+void expand_line(char **result, char *line)
 {
-	size_t	beg;
-	size_t	end;
-	size_t	i;
-	char	state;
+	size_t beg;
+	size_t end;
+	size_t i;
+	char state;
 
 	i = 0;
 	beg = 0;
@@ -72,7 +70,7 @@ void	expand_line(char **result, char *line)
 	while (line[i++])
 	{
 		if (should_continue(state, line, i))
-			continue ;
+			continue;
 		end = i;
 		while (line[i] && (ft_isalnum(line[i]) || line[i] == '_'))
 			i++;
@@ -81,8 +79,8 @@ void	expand_line(char **result, char *line)
 		append_string(result, ft_substr(line, beg, end - beg - (i > end)));
 		append_string(result, get_env(ft_substr(line, end, i - end)));
 		i += (state == SQTS || state == DQTS) && (line[i] == state);
-		if (line[i] == state || (state != DQTS && state != SQTS
-				&& (line[i] == SQTS || line[i] == DQTS)))
+		if (line[i - 1] == state || (state != DQTS && state != SQTS
+			&& (line[i] == SQTS || line[i] == DQTS)))
 			state = line[i];
 		beg = i;
 	}

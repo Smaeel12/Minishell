@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/23 16:02:46 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/23 17:49:00 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -117,6 +117,7 @@ struct s_global_data
 	char **environs;
 	int exit_status;
 	size_t env_size;
+	bool sig_received;
 };
 extern struct s_global_data g_data;
 
@@ -155,7 +156,7 @@ int ft_cd(char **argv);
 
 int init_signals(void);
 
-void	print_err(char *cmd, char *arg, char *msg);
+void print_err(char *cmd, char *arg, char *msg);
 
 static inline enum e_type determine_token(char c)
 {
