@@ -155,6 +155,8 @@ int ft_cd(char **argv);
 
 int init_signals(void);
 
+void	print_err(char *cmd, char *arg, char *msg);
+
 static inline enum e_type determine_token(char c)
 {
 	if (c == ' ' || c == '\t' || c == '\0')

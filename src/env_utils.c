@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:50:42 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/22 23:29:41 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/20 11:20:37 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,7 +22,8 @@ int	unset_env(char *key)
 	while (g_data.environs[i])
 	{
 		if (!ft_strncmp(g_data.environs[i], key, key_len)
-			|| g_data.environs[i][key_len] == '=')
+			&& (!g_data.environs[i][key_len]
+			|| g_data.environs[i][key_len] == '='))
 		{
 			free(g_data.environs[i]);
 			while (g_data.environs[i++])
@@ -47,7 +48,8 @@ int	set_env(char *new_var)
 	key_len = ft_strchr(new_var, '=') - new_var;
 	key = ft_substr(new_var, 0, key_len);
 	while (g_data.environs[++i] && !(!ft_strncmp(g_data.environs[i], key,
-				key_len) && g_data.environs[i][key_len] == '='))
+				key_len) && (!g_data.environs[i][key_len]
+			|| g_data.environs[i][key_len] == '=')))
 		;
 	free(key);
 	if (g_data.environs[i])
@@ -87,7 +89,11 @@ int	print_env(void)
 
 	i = 0;
 	while (g_data.environs && g_data.environs[i])
-		printf("%s\n", g_data.environs[i++]);
+	{
+		if (ft_strchr(g_data.environs[i], '='))
+			printf("%s\n", g_data.environs[i]);
+		i++;
+	}
 	return (0);
 }
 
