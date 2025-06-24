@@ -6,23 +6,23 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/24 21:17:57 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 23:55:45 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	execute_builtin_command(t_cmd *cmd, char **args, int *streams)
+int execute_builtin_command(t_cmd *cmd, char **args, int *streams)
 {
 	free(cmd->path);
 	if (streams[IN] == -1 || streams[OUT] == -1)
-		return (g_data.exit_status = 1 << 8, free(cmd->path), 0);
-	return (g_data.exit_status = cmd->func(args) << 8, free(cmd->path), 0);
+		return (g_data.exit_status = 1 << 8, 0);
+	return (g_data.exit_status = cmd->func(args) << 8, 0);
 }
 
-int	execute_command(t_cmd *cmd, char **args, int *streams)
+int execute_command(t_cmd *cmd, char **args, int *streams)
 {
-	pid_t	pid;
+	pid_t pid;
 
 	pid = fork();
 	if (pid == 0)
@@ -49,10 +49,10 @@ int	execute_command(t_cmd *cmd, char **args, int *streams)
 	return (signal(SIGINT, SIG_IGN), free(cmd->path), 1);
 }
 
-int	execute_pipeline(t_tree *tree, int *streams)
+int execute_pipeline(t_tree *tree, int *streams)
 {
-	int		pipefds[2];
-	t_cmd	cmd;
+	int pipefds[2];
+	t_cmd cmd;
 
 	if (!tree)
 		return (0);
@@ -61,14 +61,14 @@ int	execute_pipeline(t_tree *tree, int *streams)
 		if (pipe(pipefds) == -1)
 			return (ft_putendl_fd(CREATE_PIPE_ERROR, 2), 1);
 		execute_pipeline(tree->s_operator.left,
-			(int []){streams[IN], pipefds[OUT], pipefds[IN]});
+						 (int[]){streams[IN], pipefds[OUT], pipefds[IN]});
 		execute_pipeline(tree->s_operator.right,
-			(int []){pipefds[IN], streams[OUT], pipefds[OUT]});
+						 (int[]){pipefds[IN], streams[OUT], pipefds[OUT]});
 		return (0);
 	}
 	open_redirections(tree->s_command.redirections, streams);
 	if (!tree->s_command.arguments[0])
-		return (0);
+		return (0);-
 	cmd = (t_cmd){ft_strdup(tree->s_command.arguments[0]), NULL};
 	find_command(&cmd);
 	if (cmd.func && streams[UNUSED] == -1)

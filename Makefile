@@ -4,7 +4,7 @@ INCLUDE = include/main.h
 CFLAGS = -Wall -Wextra -Werror -g3 #-fsanitize=address
 SRCS = minishell.c $(addprefix src/, parser.c execute.c builtins.c signals.c\
 					env_utils.c parser_utils.c execute_utils.c builtins_add.c\
-					resource_cleanup.c) debug.c
+					resource_cleanup.c)
 OBJS = $(SRCS:%.c=objs/%.o)
 
 objs/%.o: %.c

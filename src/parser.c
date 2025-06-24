@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/24 21:17:36 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 23:50:36 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ static t_tree	*parse_command(t_tree *node, t_list **tokens)
 	if (!node)
 		return (ft_putendl_fd(MALLOC_FAILED, 2), NULL);
 	if (!tokens || !*tokens || ((t_token *)(*tokens)->content)->type == PIPE)
-		return (NULL);
+		return (free(node), NULL);
 	ft_bzero(node, sizeof(t_tree));
 	while (*tokens && ((t_token *)(*tokens)->content)->type != PIPE)
 	{
