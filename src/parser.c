@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/24 13:51:40 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 21:17:36 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,32 +68,30 @@ static int	parse_redirection(t_tree *node, t_list **tokens)
 	return (0);
 }
 
-static t_tree	*parse_command(t_list **tokens)
+static t_tree	*parse_command(t_tree *node, t_list **tokens)
 {
-	t_tree	*node;
 	char	*line;
 
-	if (!tokens || !*tokens || ((t_token *)(*tokens)->content)->type == PIPE)
-		return (NULL);
-	node = (t_tree *)malloc(sizeof(t_tree));
 	if (!node)
 		return (ft_putendl_fd(MALLOC_FAILED, 2), NULL);
+	if (!tokens || !*tokens || ((t_token *)(*tokens)->content)->type == PIPE)
+		return (NULL);
 	ft_bzero(node, sizeof(t_tree));
 	while (*tokens && ((t_token *)(*tokens)->content)->type != PIPE)
 	{
 		line = NULL;
-		if ((((t_token *)(*tokens)->content)->type == OUTRDR
-				|| ((t_token *)(*tokens)->content)->type == INRDR))
-		{
-			if (parse_redirection(node, tokens))
-				return (free(node), NULL);
-		}
-		else
+		if (((t_token *)(*tokens)->content)->type == WORD
+			|| ((t_token *)(*tokens)->content)->type == SQTS
+			|| ((t_token *)(*tokens)->content)->type == DQTS)
 		{
 			expand_line(&line, ((t_token *)(*tokens)->content)->value);
 			if (line[0])
 				node->s_command.arguments[node->s_command.aidx++] = line;
+			else
+				free(line);
 		}
+		else if (parse_redirection(node, tokens))
+			return (free(node), NULL);
 		*tokens = (*tokens)->next;
 	}
 	return (node->type = COMMAND_NODE, node);
@@ -104,7 +102,7 @@ t_tree	*parse_pipeline(t_list *tokens)
 	t_tree	*right;
 	t_tree	*left;
 
-	left = parse_command(&tokens);
+	left = parse_command((t_tree *)malloc(sizeof(t_tree)), &tokens);
 	while (tokens && ((t_token *)tokens->content)->type == PIPE)
 	{
 		right = (t_tree *)malloc(sizeof(t_tree));
@@ -115,7 +113,8 @@ t_tree	*parse_pipeline(t_list *tokens)
 		tokens = tokens->next;
 		right->type = OPERATOR_NODE;
 		right->s_operator.left = left;
-		right->s_operator.right = parse_command(&tokens);
+		right->s_operator.right = parse_command(
+				(t_tree *)malloc(sizeof(t_tree)), &tokens);
 		if (right->s_operator.left == NULL || right->s_operator.right == NULL
 			|| ft_strlen(right->s_operator.value) > 2)
 			return (ft_putendl_fd(PIPE_ERROR, 2), clear_tree(right), NULL);

@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:50:42 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/23 17:59:13 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 21:17:01 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int	unset_env(char *key)
 	{
 		if (!ft_strncmp(g_data.environs[i], key, key_len)
 			&& (!g_data.environs[i][key_len]
-				|| g_data.environs[i][key_len] == '='))
+			|| g_data.environs[i][key_len] == '='))
 		{
 			free(g_data.environs[i]);
 			while (g_data.environs[i++])
@@ -49,7 +49,7 @@ int	set_env(char *new_var)
 	key = ft_substr(new_var, 0, key_len);
 	while (g_data.environs[++i] && !(!ft_strncmp(g_data.environs[i], key,
 				key_len) && (!g_data.environs[i][key_len]
-				|| g_data.environs[i][key_len] == '=')))
+			|| g_data.environs[i][key_len] == '=')))
 		;
 	free(key);
 	if (g_data.environs[i])
@@ -74,13 +74,13 @@ char	*get_env(char *key)
 	i = 0;
 	key_len = ft_strlen(key);
 	if (key[i] == '?')
-		return (ft_itoa(WEXITSTATUS(g_data.exit_status)));
+		return (free(key), ft_itoa(WEXITSTATUS(g_data.exit_status)));
 	while (g_data.environs[i] && !(!ft_strncmp(g_data.environs[i], key, key_len)
 			&& g_data.environs[i][key_len] == '='))
 		i++;
 	if (g_data.environs[i])
-		return (ft_strdup(&g_data.environs[i][key_len + 1]));
-	return (NULL);
+		return (free(key), ft_strdup(&g_data.environs[i][key_len + 1]));
+	return (free(key), NULL);
 }
 
 int	print_env(void)

@@ -6,11 +6,20 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 18:13:59 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/18 07:40:48 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 21:18:33 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
+
+int	clean_exit(int status)
+{
+	clear_tree(g_data.tree);
+	clear_array(g_data.paths);
+	clear_array(g_data.environs);
+	ft_lstclear(&g_data.tokens, clear_token);
+	exit(status);
+}
 
 void	clear_token(void *arg)
 {

@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 19:15:16 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/23 23:26:59 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 20:45:27 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ void	sigint_handler(int segnum)
 
 int	init_signals(void)
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	sa.sa_handler = SIG_IGN;
 	sigemptyset(&sa.sa_mask);

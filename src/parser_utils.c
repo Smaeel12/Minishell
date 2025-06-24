@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/23 18:46:51 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 20:47:26 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -86,4 +86,17 @@ void	expand_line(char **result, char *line)
 			state = line[i];
 		beg = i;
 	}
+}
+
+char	*create_path_line(char *env_path, char *cmd, size_t cmd_len)
+{
+	size_t	path_len;
+	char	*path;
+
+	path_len = ft_strlen(env_path);
+	path = (char *)malloc((path_len + cmd_len + 2) * sizeof(char));
+	ft_strlcpy(path, env_path, path_len + 1);
+	ft_strlcpy(path + path_len, "/", 2);
+	ft_strlcpy(path + path_len + 1, cmd, cmd_len + 1);
+	return (path);
 }

@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 01:00:00 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/24 14:29:59 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 21:17:14 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,28 +39,34 @@ int	check_command(char *path)
 	struct stat	cmd_stat;
 
 	if (!path[0] || !(path[0] == '/' || !ft_strncmp(path, "./", 2)))
-		return (ft_putstr_fd(path, 2), ft_putendl_fd(NO_CMD, 2), exit(127), 1);
+		return (ft_putstr_fd(path, 2), ft_putendl_fd(NO_CMD, 2), free(path),
+			clean_exit(127), 1);
 	if (stat(path, &cmd_stat) == -1)
 	{
-		perror(path);
+		perror("ERROR");
 		if (errno == EACCES)
-			exit(126);
-		exit(127);
+			return (free(path), clean_exit(126), 1);
+		return (free(path), clean_exit(127), 1);
 	}
 	if (S_ISDIR(cmd_stat.st_mode))
-		return (ft_putstr_fd(path, 2), ft_putendl_fd(DIR_CMD, 2), exit(126), 1);
+		return (ft_putstr_fd(path, 2), ft_putendl_fd(DIR_CMD, 2), free(path),
+			clean_exit(126), 1);
 	if (!(cmd_stat.st_mode & S_IXUSR))
-		return (ft_putstr_fd(path, 2), ft_putendl_fd(NO_PERM, 2), exit(126), 1);
+		return (ft_putstr_fd(path, 2), ft_putendl_fd(NO_PERM, 2), free(path),
+			clean_exit(126), 1);
 	return (0);
 }
 
-int	find_command(t_cmd *cmd, t_cmd *builtins)
+int	find_command(t_cmd *cmd)
 {
-	size_t	path_len;
+	t_cmd	*builtins;
 	size_t	cmd_len;
 	char	*path;
 	int		i;
 
+	builtins = (t_cmd[]){{"echo", ft_echo}, {"cd", ft_cd}, {"pwd", ft_pwd},
+	{"export", ft_export}, {"unset", ft_unset}, {"env", ft_env}, {"exit",
+		ft_exit}, {NULL, NULL}};
 	if (cmd->path[0] == '/' || !ft_strncmp(cmd->path, "./", 2))
 		return (0);
 	i = -1;
@@ -71,11 +77,7 @@ int	find_command(t_cmd *cmd, t_cmd *builtins)
 	i = -1;
 	while (cmd->path[0] && g_data.paths[++i])
 	{
-		path_len = ft_strlen(g_data.paths[i]);
-		path = (char *)malloc((path_len + cmd_len + 2) * sizeof(char));
-		ft_strlcpy(path, g_data.paths[i], path_len + 1);
-		ft_strlcpy(path + path_len, "/", 2);
-		ft_strlcpy(path + path_len + 1, cmd->path, cmd_len + 1);
+		path = create_path_line(g_data.paths[++i], cmd->path, cmd_len);
 		if (!access(path, F_OK | X_OK))
 			return (free(cmd->path), cmd->path = path, 0);
 		free(path);
