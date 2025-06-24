@@ -29,6 +29,19 @@ int	ft_unset(char **argv)
 	return (0);
 }
 
+int	ft_export_check(char *arg)
+{
+	int	i;
+
+	i = 1;
+	if (!ft_isalpha(arg[0]) && !(arg[0] == '_'))
+		return (0);
+	while (arg[i])
+		if (!ft_isalnum(arg[i++]))
+			return (0);
+	return (1);
+}
+
 int	ft_export(char **argv)
 {
 	int	i;
@@ -45,11 +58,10 @@ int	ft_export(char **argv)
 	j = 1;
 	while (i > 1 && argv[j])
 	{
-		if (!ft_isalpha(argv[j][0]) && !(argv[j][0] == '_'))
-		{
-			print_err("export: `", argv[j++], "': not a valid identifier");
+		if (!ft_export_check(argv[j]))
 			ret = 1;
-		}
+		if (ret)
+			print_err("export: `", argv[j++], "': not a valid identifier");
 		else
 			set_env(ft_strdup(argv[j++]));
 	}
