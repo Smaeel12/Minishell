@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 01:00:00 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/23 16:02:16 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/24 14:29:59 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,11 +41,12 @@ int	check_command(char *path)
 	if (!path[0] || !(path[0] == '/' || !ft_strncmp(path, "./", 2)))
 		return (ft_putstr_fd(path, 2), ft_putendl_fd(NO_CMD, 2), exit(127), 1);
 	if (stat(path, &cmd_stat) == -1)
+	{
 		perror(path);
-	if (errno == ENONET)
+		if (errno == EACCES)
+			exit(126);
 		exit(127);
-	if (errno == EACCES)
-		exit(126);
+	}
 	if (S_ISDIR(cmd_stat.st_mode))
 		return (ft_putstr_fd(path, 2), ft_putendl_fd(DIR_CMD, 2), exit(126), 1);
 	if (!(cmd_stat.st_mode & S_IXUSR))
@@ -89,7 +90,7 @@ static int	open_heredoc(char *delem)
 	int		fd;
 
 	delem_len = ft_strlen(delem);
-	fd = open(HEREDOC_FILE, O_TRUNC | O_WRONLY | O_CREAT, 0644);
+	fd = open(HEREDOC_FILE, O_APPEND | O_WRONLY | O_CREAT, 0644);
 	while (fd > 0)
 	{
 		line = readline("heredoc> ");
@@ -100,9 +101,7 @@ static int	open_heredoc(char *delem)
 		ft_putendl_fd(line, fd);
 		free(line);
 	}
-	close(fd);
-	fd = open(HEREDOC_FILE, O_RDONLY);
-	return (fd);
+	return (close(fd), open(HEREDOC_FILE, O_RDONLY));
 }
 
 int	open_redirections(struct s_redirections *rdrs, int *fds)

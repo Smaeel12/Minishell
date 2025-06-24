@@ -12,9 +12,9 @@
 
 #include "../libft.h"
 
-char *ft_strjoin_helper(char *lbuf, char *rbuf)
+char	*ft_strjoin_helper(char *lbuf, char *rbuf)
 {
-	char *new;
+	char	*new;
 
 	if (!lbuf)
 		new = ft_strdup(rbuf);
@@ -23,9 +23,9 @@ char *ft_strjoin_helper(char *lbuf, char *rbuf)
 	return (free(lbuf), new);
 }
 
-char *return_line(char **lbuf, char *pos)
+char	*return_line(char **lbuf, char *pos)
 {
-	char *temp;
+	char	*temp;
 
 	temp = ft_substr(*lbuf, 0, pos - *lbuf + 1);
 	if (!temp)
@@ -38,11 +38,11 @@ char *return_line(char **lbuf, char *pos)
 	return (temp);
 }
 
-char *get_next_line(int fd)
+char	*get_next_line(int fd)
 {
-	static char *lbuf;
-	char *rbuf;
-	ssize_t nb;
+	static char	*lbuf;
+	char		*rbuf;
+	ssize_t		nb;
 
 	rbuf = (char *)malloc((size_t)BUFFER_SIZE + 1);
 	while (rbuf)

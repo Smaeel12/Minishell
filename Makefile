@@ -17,7 +17,6 @@ $(NAME): $(OBJS) $(INCLUDE)
 	make -C libft
 	$(CC) $(CFLAGS) $(OBJS) -o $(NAME) -Llibft -lft -lreadline -ltermcap
 
-
 clean:
 	make clean -C libft
 	rm -rf objs/
@@ -29,3 +28,5 @@ fclean: clean
 re: fclean all
 
 .PHONY: all clean fclean re
+
+.SECONDARY: $(OBJS)

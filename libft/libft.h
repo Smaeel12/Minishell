@@ -18,9 +18,9 @@
 # endif
 
 /* HEADERS */
+# include <stdarg.h>
 # include <stdlib.h>
 # include <unistd.h>
-# include <stdarg.h>
 
 /* LIBFT */
 typedef struct s_list
@@ -84,10 +84,9 @@ t_list				*ft_get_node(t_list *lst, int idx);
 t_list				*ft_lstcopy(t_list *lst);
 
 /* PRINTF */
-int	ft_printf(const char *format, ...);
+int					ft_printf(const char *format, ...);
 
 /* GET_NEXT_LINE */
-char	*get_next_line(int fd);
+char				*get_next_line(int fd);
 
 #endif
-

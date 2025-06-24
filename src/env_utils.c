@@ -12,16 +12,18 @@
 
 #include "../include/main.h"
 
-int unset_env(char *key)
+int	unset_env(char *key)
 {
-	size_t key_len;
-	size_t i;
+	size_t	key_len;
+	size_t	i;
 
 	i = 0;
 	key_len = ft_strlen(key);
 	while (g_data.environs[i])
 	{
-		if (!ft_strncmp(g_data.environs[i], key, key_len) && (!g_data.environs[i][key_len] || g_data.environs[i][key_len] == '='))
+		if (!ft_strncmp(g_data.environs[i], key, key_len)
+			&& (!g_data.environs[i][key_len]
+				|| g_data.environs[i][key_len] == '='))
 		{
 			free(g_data.environs[i]);
 			while (g_data.environs[i++])
@@ -35,19 +37,19 @@ int unset_env(char *key)
 	return (0);
 }
 
-int set_env(char *new_var)
+int	set_env(char *new_var)
 {
-	char **new_array;
-	size_t key_len;
-	char *key;
-	int i;
+	char	**new_array;
+	size_t	key_len;
+	char	*key;
+	int		i;
 
 	i = -1;
 	key_len = ft_strchr(new_var, '=') - new_var;
 	key = ft_substr(new_var, 0, key_len);
 	while (g_data.environs[++i] && !(!ft_strncmp(g_data.environs[i], key,
-												 key_len) &&
-									 (!g_data.environs[i][key_len] || g_data.environs[i][key_len] == '=')))
+				key_len) && (!g_data.environs[i][key_len]
+				|| g_data.environs[i][key_len] == '=')))
 		;
 	free(key);
 	if (g_data.environs[i])
@@ -64,25 +66,26 @@ int set_env(char *new_var)
 	return (0);
 }
 
-char *get_env(char *key)
+char	*get_env(char *key)
 {
-	size_t key_len;
-	size_t i;
+	size_t	key_len;
+	size_t	i;
 
 	i = 0;
 	key_len = ft_strlen(key);
 	if (key[i] == '?')
 		return (ft_itoa(WEXITSTATUS(g_data.exit_status)));
-	while (g_data.environs[i] && !(!ft_strncmp(g_data.environs[i], key, key_len) && g_data.environs[i][key_len] == '='))
+	while (g_data.environs[i] && !(!ft_strncmp(g_data.environs[i], key, key_len)
+			&& g_data.environs[i][key_len] == '='))
 		i++;
 	if (g_data.environs[i])
 		return (ft_strdup(&g_data.environs[i][key_len + 1]));
 	return (NULL);
 }
 
-int print_env(void)
+int	print_env(void)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (g_data.environs && g_data.environs[i])
@@ -94,11 +97,11 @@ int print_env(void)
 	return (0);
 }
 
-int init_env(void)
+int	init_env(void)
 {
-	extern char **environ;
-	size_t size;
-	size_t i;
+	extern char	**environ;
+	size_t		size;
+	size_t		i;
 
 	i = 0;
 	size = 0;
