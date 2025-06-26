@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/24 23:55:45 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/26 16:15:47 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@ int execute_builtin_command(t_cmd *cmd, char **args, int *streams)
 {
 	free(cmd->path);
 	if (streams[IN] == -1 || streams[OUT] == -1)
-		return (g_data.exit_status = 1 << 8, 0);
-	return (g_data.exit_status = cmd->func(args) << 8, 0);
+		return (g_data.exit_status = 1, 0);
+	return (g_data.exit_status = cmd->func(args), 0);
 }
 
 int execute_command(t_cmd *cmd, char **args, int *streams)
@@ -29,10 +29,10 @@ int execute_command(t_cmd *cmd, char **args, int *streams)
 	{
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
-		if (streams[UNUSED] != -1)
-			close(streams[UNUSED]);
 		if (streams[IN] == -1 || streams[OUT] == -1)
 			return (free(cmd->path), clean_exit(1), 1);
+		if (streams[UNUSED] != -1)
+			close(streams[UNUSED]);
 		dup2(streams[OUT], OUT);
 		dup2(streams[IN], IN);
 		close(streams[OUT]);
@@ -46,7 +46,7 @@ int execute_command(t_cmd *cmd, char **args, int *streams)
 	}
 	if (pid < 0)
 		ft_putendl_fd(FORK_FAILED, 2);
-	return (signal(SIGINT, SIG_IGN), free(cmd->path), 1);
+	return (free(cmd->path), 1);
 }
 
 int execute_pipeline(t_tree *tree, int *streams)
@@ -66,9 +66,10 @@ int execute_pipeline(t_tree *tree, int *streams)
 						 (int[]){pipefds[IN], streams[OUT], pipefds[OUT]});
 		return (0);
 	}
-	open_redirections(tree->s_command.redirections, streams);
+	open_heredocs(tree->s_command.heredocs, tree->s_command.hidx);
+	open_redirections(tree->s_command.redirections, tree->s_command.ridx, streams);
 	if (!tree->s_command.arguments[0])
-		return (0);-
+		return (0);
 	cmd = (t_cmd){ft_strdup(tree->s_command.arguments[0]), NULL};
 	find_command(&cmd);
 	if (cmd.func && streams[UNUSED] == -1)

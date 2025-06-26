@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:50:42 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/24 23:47:15 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/25 15:29:20 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ char *get_env(char *key)
 	i = 0;
 	key_len = ft_strlen(key);
 	if (key[i] == '?')
-		return (free(key), ft_itoa(WEXITSTATUS(g_data.exit_status)));
+		return (free(key), ft_itoa(g_data.exit_status));
 	while (g_data.environs[i] && !(!ft_strncmp(g_data.environs[i], key, key_len) && g_data.environs[i][key_len] == '='))
 		i++;
 	if (g_data.environs[i])

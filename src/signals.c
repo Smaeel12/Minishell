@@ -6,13 +6,13 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/30 19:15:16 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/24 20:45:27 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/25 15:33:55 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-void	sigint_handler(int segnum)
+void sigint_handler(int segnum)
 {
 	(void)segnum;
 	ft_putchar_fd('\n', STDOUT_FILENO);
@@ -21,9 +21,9 @@ void	sigint_handler(int segnum)
 	rl_redisplay();
 }
 
-int	init_signals(void)
+int init_signals(void)
 {
-	struct sigaction	sa;
+	struct sigaction sa;
 
 	sa.sa_handler = SIG_IGN;
 	sigemptyset(&sa.sa_mask);
