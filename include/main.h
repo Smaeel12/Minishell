@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/26 16:36:52 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/27 18:11:31 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -146,7 +146,6 @@ void clear_token(void *arg);
 int clear_tree(t_tree *tree);
 int clear_array(char **array);
 
-void expand_line(char **result, char *line);
 int add_token(t_list **lst, enum e_type state, char *line, size_t idx);
 
 int wait_processes(void);

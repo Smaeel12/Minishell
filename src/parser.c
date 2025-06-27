@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/25 23:21:07 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/27 16:22:42 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ static int parse_redirection(t_tree *node, t_list **tokens)
 		if (!*tokens || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
 			return (ft_putendl_fd(MISSING_DELIM, 2), 1);
 		node->s_command.heredocs[node->s_command.hidx].mode = (token->type == WORD);
-		node->s_command.heredocs[node->s_command.hidx++].delim = token->value;
+		expand_line(&node->s_command.heredocs[node->s_command.hidx++].delim, token->value, true);
 		node->s_command.redirections[node->s_command.ridx].type = HEREDOC;
 		node->s_command.redirections[node->s_command.ridx++].file = ft_strdup("");
 	}
@@ -71,7 +71,7 @@ static int parse_redirection(t_tree *node, t_list **tokens)
 		token = (t_token *)(*tokens)->content;
 		if (!*tokens || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
 			return (ft_putendl_fd(MISSING_FILENAME, 2), 1);
-		expand_line(&node->s_command.redirections[node->s_command.ridx++].file, token->value);
+		expand_line(&node->s_command.redirections[node->s_command.ridx++].file, token->value, true);
 	}
 	return (0);
 }
@@ -90,7 +90,7 @@ static t_tree *parse_command(t_tree *node, t_list **tokens)
 		line = NULL;
 		if (((t_token *)(*tokens)->content)->type == WORD || ((t_token *)(*tokens)->content)->type == SQTS || ((t_token *)(*tokens)->content)->type == DQTS)
 		{
-			expand_line(&line, ((t_token *)(*tokens)->content)->value);
+			expand_line(&line, ((t_token *)(*tokens)->content)->value, true);
 			if (line[0])
 				node->s_command.arguments[node->s_command.aidx++] = line;
 			else

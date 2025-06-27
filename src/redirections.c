@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 17:00:29 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/26 16:38:19 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/27 16:23:34 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -25,13 +25,16 @@ static int open_heredoc(char *delim)
 		line = readline("heredoc> ");
 		if (!line || !ft_strncmp(line, delim, delim_len + 1))
 			break;
+		expand_line(&line, line, false);
 		ft_putendl_fd(line, fd);
+		free(line);
 	}
 	if (fd == -1)
 		perror(HEREDOC_FILE);
 	else if (!line)
 		ft_putendl_fd(HEREDOC_EOF, 2);
 	close(fd);
+	free(delim);
 	return (0);
 }
 
