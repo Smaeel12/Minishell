@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/27 18:11:31 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/29 01:23:34 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -130,6 +130,8 @@ struct s_global_data
 extern struct s_global_data g_data;
 
 /** PROTOTYPES */
+char **expand_line(char *line, bool skip_mode, bool expand_mode);
+
 int tokenize_cmdline(t_list **lst, char *line);
 t_tree *parse_pipeline(t_list *tokens);
 

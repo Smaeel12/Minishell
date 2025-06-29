@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/27 16:22:42 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/29 01:38:17 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,6 +42,7 @@ int tokenize_cmdline(t_list **lst, char *line)
 static int parse_redirection(t_tree *node, t_list **tokens)
 {
 	t_token *token;
+	char *line;
 	size_t len;
 
 	token = (t_token *)(*tokens)->content;
@@ -50,35 +51,41 @@ static int parse_redirection(t_tree *node, t_list **tokens)
 		return (ft_putendl_fd(RDR_INVALID, 2), 1);
 	if (token->value[0] == '<' && len == 2)
 	{
-		*tokens = (*tokens)->next;
-		token = (t_token *)(*tokens)->content;
-		if (!*tokens || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
-			return (ft_putendl_fd(MISSING_DELIM, 2), 1);
-		node->s_command.heredocs[node->s_command.hidx].mode = (token->type == WORD);
-		expand_line(&node->s_command.heredocs[node->s_command.hidx++].delim, token->value, true);
 		node->s_command.redirections[node->s_command.ridx].type = HEREDOC;
-		node->s_command.redirections[node->s_command.ridx++].file = ft_strdup("");
 	}
-	else
+	else if (token->value[0] == '>' && len == 2)
+		node->s_command.redirections[node->s_command.ridx]
+			.type = APPEND;
+	else if (token->value[0] == '>' && len == 1)
+		node->s_command.redirections[node->s_command.ridx]
+			.type = OUTRDR;
+	else if (token->value[0] == '<' && len == 1)
+		node->s_command.redirections[node->s_command.ridx]
+			.type = INRDR;
+	*tokens = (*tokens)->next;
+	token = (t_token *)(*tokens)->content;
+	if (!*tokens || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
+		return (ft_putendl_fd(MISSING_DELIM, 2), 1);
+	if (!*tokens || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
+		return (ft_putendl_fd(MISSING_FILENAME, 2), 1);
+	line = expand_line(token->value, true, true);
+	while (line && line[0])
 	{
-		if (token->value[0] == '>' && len == 2)
-			node->s_command.redirections[node->s_command.ridx].type = APPEND;
-		else if (token->value[0] == '>' && len == 1)
-			node->s_command.redirections[node->s_command.ridx].type = OUTRDR;
-		else if (token->value[0] == '<' && len == 1)
-			node->s_command.redirections[node->s_command.ridx].type = INRDR;
-		*tokens = (*tokens)->next;
-		token = (t_token *)(*tokens)->content;
-		if (!*tokens || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
-			return (ft_putendl_fd(MISSING_FILENAME, 2), 1);
-		expand_line(&node->s_command.redirections[node->s_command.ridx++].file, token->value, true);
+		node->s_command.redirections[node->s_command.ridx++].file = line;
+		line = expand_line(NULL, true, true);
+	}
+	if (token->value[0] == '<' && len == 2)
+	{
+		node->s_command.heredocs[node->s_command.hidx].mode = (token->type == WORD);
+		node->s_command.heredocs[node->s_command.hidx++].delim = expand_line(token->value, true, false);
 	}
 	return (0);
 }
 
 static t_tree *parse_command(t_tree *node, t_list **tokens)
 {
-	char *line;
+	t_token *token;
+	char *str;
 
 	if (!node)
 		return (ft_putendl_fd(MALLOC_FAILED, 2), NULL);
@@ -87,14 +94,15 @@ static t_tree *parse_command(t_tree *node, t_list **tokens)
 	ft_bzero(node, sizeof(t_tree));
 	while (*tokens && ((t_token *)(*tokens)->content)->type != PIPE)
 	{
-		line = NULL;
-		if (((t_token *)(*tokens)->content)->type == WORD || ((t_token *)(*tokens)->content)->type == SQTS || ((t_token *)(*tokens)->content)->type == DQTS)
+		token = (t_token *)(*tokens)->content;
+		if (token->type == WORD || token->type == SQTS || token->type == DQTS)
 		{
-			expand_line(&line, ((t_token *)(*tokens)->content)->value, true);
-			if (line[0])
-				node->s_command.arguments[node->s_command.aidx++] = line;
-			else
-				free(line);
+			str = expand_line(token->value, true, true);
+			while (str && str[0])
+			{
+				node->s_command.redirections[node->s_command.ridx++].file = str;
+				str = expand_line(NULL, true, true);
+			}
 		}
 		else if (parse_redirection(node, tokens))
 			return (free(node), NULL);

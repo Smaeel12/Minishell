@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/27 18:39:31 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/06/29 02:23:37 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,35 +51,75 @@ void create_line(char **result, char *line, char *value)
 	*result = new;
 }
 
-char *expand_line(char *line, bool skip_mode, bool expand_mode)
+char *ft_strjoin_helper(char *s1, char *s2)
 {
 	char *new;
+
+	if (!s1)
+		new = ft_strdup(s2);
+	else if (!s2)
+		new = ft_strdup(s1);
+	else
+		new = ft_strjoin(s1, s2);
+	return (free(s1), free(s2), new);
+}
+
+int should_continue(enum e_type state, char *line, size_t expand_mode)
+{
+	if (!*line)
+		return (0);
+	if ((state == SQTS || state == DQTS) && *line == (char)state)
+		return (0);
+	if (*(line - 1) == '$' &&
+		(ft_isalpha(*line) || *line == '_' || *line == '?'))
+		return (0);
+	return (1);
+}
+
+char **expand_line(char *line, bool skip_mode, bool expand_mode)
+{
+	char **new;
+	char *value;
+	char **splitted;
 	char state;
 	size_t beg;
 	size_t end;
 	size_t i;
+	size_t instr;
+	size_t ivals;
 
 	i = 0;
 	beg = 0;
-	new = NULL;
+	instr = 0;
 	state = line[beg];
+	new = (char **)malloc((MAX_ARGS / 2) * sizeof(char *));
+	ft_bzero(new, (MAX_ARGS / 2) * sizeof(char *));
 	while (line[i++])
 	{
-		if (state == SQTS && line[i] && line[i] != (char)state && skip_mode)
-			continue;
-		if ((line[i] != SQTS && line[i] != DQTS) && line[i - 1] == '$' &&
-			line[i] && !(ft_isalpha(line[i]) || line[i] == '_' || line[i] == '?'))
-			continue;
-		if (line[i - 1] != '$' && line[i] && state == DQTS && line[i] != (char)state)
-			continue;
-		if ((line[i - 1] == '$' && !expand_mode) || (line[i] && line[i - 1] != '$' && line[i] != DQTS && line[i] != SQTS))
+		if (should_continue(state, line, expand_mode))
 			continue;
 		end = i;
 		while (line[i] && (ft_isalnum(line[i]) || line[i] == '_'))
 			i++;
 		i += (line[i] && line[i] == '?');
 		beg += (state == SQTS || state == DQTS) && (line[beg] == state) && skip_mode;
-		create_line(&new, ft_substr(line, beg, end - beg - (i > end)), get_env(ft_substr(line, end, i - end)));
+		new[instr] = ft_strjoin_helper(new[instr], ft_substr(line, beg, end - beg - (i > end)));
+		value = get_env(ft_substr(line, end, i - end));
+		if (state != SQTS && state != DQTS)
+		{
+			ivals = 0;
+			splitted = ft_split(value, ' ');
+			while (splitted && splitted[ivals])
+			{
+				new[instr] = ft_strjoin_helper(new[instr], splitted[ivals]);
+				ivals++;
+				instr++;
+			}
+			free(splitted);
+			free(value);
+		}
+		else
+			new[instr] = ft_strjoin_helper(new[instr], value);
 		i += (state == SQTS || state == DQTS) && (line[i] == state) && skip_mode;
 		if (line[i - 1] == state || (state != DQTS && state != SQTS && (line[i] == SQTS || line[i] == DQTS)))
 			state = line[i];

@@ -1,6 +1,6 @@
 #include "include/main.h"
 
-char *expand_line(char *line, bool skip_mode, bool expand_mode);
+char **expand_line(char *line, bool skip_mode, bool expand_mode);
 
 char *get_env(char *key)
 {
@@ -20,8 +20,12 @@ int main(int ac, char **av)
 {
 	if (ac < 2)
 		return (0);
-	char *delim = expand_line(av[1], false, false);
-	printf("%s\n", delim);
-	free(delim);
+	char **strs = expand_line(av[1], false, true);
+	for (size_t i = 0; strs[i]; i++)
+	{
+		printf("%s\n", strs[i]);
+		free(strs[i]);
+	}
+	free(strs);
 	return (0);
 }
