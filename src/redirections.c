@@ -6,18 +6,18 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 17:00:29 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 01:55:39 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/01 03:55:30 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-static int	open_heredoc(char *delim, bool mode)
+static int open_heredoc(char *delim, bool mode)
 {
-	size_t	delim_len;
-	char	*expanded;
-	char	*line;
-	int		fd;
+	size_t delim_len;
+	char *expanded;
+	char *line;
+	int fd;
 
 	delim_len = ft_strlen(delim);
 	fd = open(HEREDOC_FILE, O_TRUNC | O_WRONLY | O_CREAT, 0644);
@@ -26,7 +26,7 @@ static int	open_heredoc(char *delim, bool mode)
 		expanded = NULL;
 		line = readline("heredoc> ");
 		if (!line || !ft_strncmp(line, delim, delim_len + 1))
-			break ;
+			break;
 		expand_line(&expanded, line, (bool[]){mode, false}, 1);
 		ft_putendl_fd(expanded, fd);
 		free(expanded);
@@ -40,11 +40,11 @@ static int	open_heredoc(char *delim, bool mode)
 	return (0);
 }
 
-int	open_heredocs(struct s_heredoc *heredocs, size_t size)
+int open_heredocs(struct s_heredoc *heredocs, size_t size)
 {
-	int		status;
-	pid_t	pid;
-	size_t	i;
+	int status;
+	pid_t pid;
+	size_t i;
 
 	i = 0;
 	pid = fork();
@@ -61,18 +61,21 @@ int	open_heredocs(struct s_heredoc *heredocs, size_t size)
 	if (pid < 0)
 		ft_putendl_fd(FORK_FAILED, 2);
 	wait(&status);
-	if (WTERMSIG(status))
+	g_data.exit_status = WEXITSTATUS(status);
+	if (WIFSIGNALED(status))
 	{
+		g_data.exit_status = WTERMSIG(status) + 128;
 		unlink(HEREDOC_FILE);
+		printf("\n");
 		return (-1);
 	}
 	return (0);
 }
 
-int	open_redirections(char **rdrs, size_t size, int *fds)
+int open_redirections(char **rdrs, size_t size, int *fds)
 {
-	size_t	len;
-	int		i;
+	size_t len;
+	int i;
 
 	i = -1;
 	while (++i < (int)size && rdrs[i])

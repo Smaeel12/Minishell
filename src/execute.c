@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 03:18:48 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/01 03:45:54 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,10 +67,9 @@ int	execute_pipeline(t_tree *tree, int *streams)
 		return (0);
 	}
 	if (open_heredocs(tree->s_cmd.heredocs, tree->s_cmd.hidx) == -1
-		|| open_redirections(tree->s_cmd.rdrs, tree->s_cmd.ridx, streams) == -1)
-		return (-1);
-	if (!tree->s_cmd.args[0])
-		return (0);
+		|| open_redirections(tree->s_cmd.rdrs, tree->s_cmd.ridx, streams) == -1
+		|| !tree->s_cmd.args[0])
+		return (1);
 	cmd = (t_cmd){ft_strdup(tree->s_cmd.args[0]), NULL};
 	if (find_command(&cmd) && cmd.func && streams[UNUSED] == -1)
 		execute_builtin_command(&cmd, tree->s_cmd.args, streams);
