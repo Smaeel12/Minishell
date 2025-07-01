@@ -6,28 +6,30 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 17:00:29 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/27 23:35:12 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/01 01:55:39 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-static int open_heredoc(char *delim, bool mode)
+static int	open_heredoc(char *delim, bool mode)
 {
-	size_t delim_len;
-	char *line;
-	int fd;
+	size_t	delim_len;
+	char	*expanded;
+	char	*line;
+	int		fd;
 
 	delim_len = ft_strlen(delim);
 	fd = open(HEREDOC_FILE, O_TRUNC | O_WRONLY | O_CREAT, 0644);
 	while (fd > 0)
 	{
+		expanded = NULL;
 		line = readline("heredoc> ");
 		if (!line || !ft_strncmp(line, delim, delim_len + 1))
-			break;
-		char **strs = expand_line(line, true, mode);
-		ft_putendl_fd(strs[0], fd);
-		free(strs);
+			break ;
+		expand_line(&expanded, line, (bool[]){mode, false}, 1);
+		ft_putendl_fd(expanded, fd);
+		free(expanded);
 		free(line);
 	}
 	if (fd == -1)
@@ -35,15 +37,14 @@ static int open_heredoc(char *delim, bool mode)
 	else if (!line)
 		ft_putendl_fd(HEREDOC_EOF, 2);
 	close(fd);
-	free(delim);
 	return (0);
 }
 
-int open_heredocs(struct s_heredoc *heredocs, size_t size)
+int	open_heredocs(struct s_heredoc *heredocs, size_t size)
 {
-	int status;
-	pid_t pid;
-	size_t i;
+	int		status;
+	pid_t	pid;
+	size_t	i;
 
 	i = 0;
 	pid = fork();
@@ -68,30 +69,31 @@ int open_heredocs(struct s_heredoc *heredocs, size_t size)
 	return (0);
 }
 
-int open_redirections(struct s_redirections *rdrs, size_t size, int *fds)
+int	open_redirections(char **rdrs, size_t size, int *fds)
 {
-	size_t i;
+	size_t	len;
+	int		i;
 
-	i = 0;
-	while (i < size)
+	i = -1;
+	while (++i < (int)size && rdrs[i])
 	{
-		if (rdrs[i].type == HEREDOC || rdrs[i].type == INRDR)
+		len = ft_strlen(rdrs[i]);
+		if (rdrs[i][0] == '<')
 			close(fds[IN]);
-		if (rdrs[i].type == OUTRDR || rdrs[i].type == APPEND)
+		if (rdrs[i][0] == '>')
 			close(fds[OUT]);
-		if (rdrs[i].type == HEREDOC)
+		if (rdrs[i][0] == '<' && len == 1)
+			fds[IN] = open(rdrs[++i], O_RDONLY);
+		if (rdrs[i][0] == '<' && len == 2 && rdrs[++i])
 			fds[IN] = open(HEREDOC_FILE, O_RDONLY);
-		if (rdrs[i].type == INRDR)
-			fds[IN] = open(rdrs[i].file, O_RDONLY);
-		if (rdrs[i].type == OUTRDR)
-			fds[OUT] = open(rdrs[i].file, O_TRUNC | O_WRONLY | O_CREAT, 0644);
-		if (rdrs[i].type == APPEND)
-			fds[OUT] = open(rdrs[i].file, O_APPEND | O_WRONLY | O_CREAT, 0644);
+		if (rdrs[i][0] == '>' && len == 1)
+			fds[OUT] = open(rdrs[++i], O_TRUNC | O_WRONLY | O_CREAT, 0644);
+		if (rdrs[i][0] == '>' && len == 2)
+			fds[OUT] = open(rdrs[++i], O_APPEND | O_WRONLY | O_CREAT, 0644);
 		if (fds[OUT] == -1)
-			return (perror(rdrs[i].file), close(fds[IN]), -1);
+			return (perror(rdrs[i]), close(fds[IN]), -1);
 		if (fds[IN] == -1)
-			return (perror(rdrs[i].file), close(fds[OUT]), -1);
-		i++;
+			return (perror(rdrs[i]), close(fds[OUT]), -1);
 	}
 	return (0);
 }

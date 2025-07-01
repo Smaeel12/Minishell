@@ -6,13 +6,13 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/28 18:13:59 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/26 15:42:52 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/01 01:29:55 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-void clean_exit(int status)
+void	clean_exit(int status)
 {
 	clear_tree(g_data.tree);
 	clear_array(g_data.paths);
@@ -21,19 +21,19 @@ void clean_exit(int status)
 	exit(status);
 }
 
-void clear_token(void *arg)
+void	clear_token(void *arg)
 {
-	t_token *token;
+	t_token	*token;
 
 	token = arg;
 	free(token->value);
 	free(token);
 }
 
-int clear_tree(t_tree *tree)
+int	clear_tree(t_tree *tree)
 {
-	size_t i;
-	size_t j;
+	size_t	i;
+	size_t	j;
 
 	i = 0;
 	j = 0;
@@ -41,10 +41,10 @@ int clear_tree(t_tree *tree)
 		return (0);
 	if (tree->type == COMMAND_NODE)
 	{
-		while (tree->s_command.arguments[i])
-			free(tree->s_command.arguments[i++]);
-		while (tree->s_command.redirections[j].file)
-			free(tree->s_command.redirections[j++].file);
+		while (tree->s_cmd.args[i])
+			free(tree->s_cmd.args[i++]);
+		while (tree->s_cmd.rdrs[j])
+			free(tree->s_cmd.rdrs[j++]);
 		free(tree);
 		return (0);
 	}
@@ -54,9 +54,9 @@ int clear_tree(t_tree *tree)
 	return (0);
 }
 
-int clear_array(char **array)
+int	clear_array(char **array)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (array && array[i])

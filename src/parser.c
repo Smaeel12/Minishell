@@ -6,17 +6,17 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/29 01:38:17 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/01 03:03:50 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int tokenize_cmdline(t_list **lst, char *line)
+int	tokenize_cmdline(t_list **lst, char *line)
 {
-	enum e_type cstate;
-	enum e_type state;
-	char *temp;
+	enum e_type	cstate;
+	enum e_type	state;
+	char		*temp;
 
 	temp = line;
 	state = determine_token(*temp);
@@ -28,7 +28,8 @@ int tokenize_cmdline(t_list **lst, char *line)
 		if ((state == DQTS || state == SQTS) && cstate != state)
 			return (ft_putendl_fd(UNCLOS_QUOTES, 2), ft_lstclear(lst, free), 1);
 		cstate = determine_token(*temp);
-		if (((state == DQTS || state == SQTS || state == WORD) && (cstate == WORD || cstate == DQTS || cstate == SQTS)))
+		if (((state == DQTS || state == SQTS || state == WORD)
+				&& (cstate == WORD || cstate == DQTS || cstate == SQTS)))
 			state = cstate;
 		if (cstate != state)
 		{
@@ -39,53 +40,39 @@ int tokenize_cmdline(t_list **lst, char *line)
 	}
 	return (0);
 }
-static int parse_redirection(t_tree *node, t_list **tokens)
-{
-	t_token *token;
-	char *line;
-	size_t len;
 
-	token = (t_token *)(*tokens)->content;
-	len = ft_strlen(token->value);
+static int	parse_redirection(t_tree *node, t_list **tokens)
+{
+	t_token	*tk;
+	size_t	len;
+
+	tk = (t_token *)(*tokens)->content;
+	len = ft_strlen(tk->value);
 	if (len > 2)
 		return (ft_putendl_fd(RDR_INVALID, 2), 1);
-	if (token->value[0] == '<' && len == 2)
-	{
-		node->s_command.redirections[node->s_command.ridx].type = HEREDOC;
-	}
-	else if (token->value[0] == '>' && len == 2)
-		node->s_command.redirections[node->s_command.ridx]
-			.type = APPEND;
-	else if (token->value[0] == '>' && len == 1)
-		node->s_command.redirections[node->s_command.ridx]
-			.type = OUTRDR;
-	else if (token->value[0] == '<' && len == 1)
-		node->s_command.redirections[node->s_command.ridx]
-			.type = INRDR;
+	node->s_cmd.rdrs[node->s_cmd.ridx++] = ft_strdup(tk->value);
 	*tokens = (*tokens)->next;
-	token = (t_token *)(*tokens)->content;
-	if (!*tokens || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
-		return (ft_putendl_fd(MISSING_DELIM, 2), 1);
-	if (!*tokens || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
+	tk = (t_token *)(*tokens)->content;
+	if (node->s_cmd.rdrs[node->s_cmd.ridx - 1][0] == '<' && len == 2)
+	{
+		node->s_cmd.heredocs[node->s_cmd.hidx].mode = tk->type;
+		if (!tk || !(tk->type == WORD || tk->type == SQTS || tk->type == DQTS))
+			return (ft_putendl_fd(MISSING_DELIM, 2), 1);
+		return (node->s_cmd.ridx
+			+= expand_line(&node->s_cmd.rdrs[node->s_cmd.ridx], tk->value,
+				(bool[]){false, true}, MAX_REDIRECTIONS - node->s_cmd.ridx),
+			node->s_cmd.heredocs[node->s_cmd.hidx++].delim = (node->s_cmd.rdrs[node->s_cmd.ridx
+				- 1]), 0);
+	}
+	else if (!tk || !(tk->type == WORD || tk->type == SQTS || tk->type == DQTS))
 		return (ft_putendl_fd(MISSING_FILENAME, 2), 1);
-	line = expand_line(token->value, true, true);
-	while (line && line[0])
-	{
-		node->s_command.redirections[node->s_command.ridx++].file = line;
-		line = expand_line(NULL, true, true);
-	}
-	if (token->value[0] == '<' && len == 2)
-	{
-		node->s_command.heredocs[node->s_command.hidx].mode = (token->type == WORD);
-		node->s_command.heredocs[node->s_command.hidx++].delim = expand_line(token->value, true, false);
-	}
-	return (0);
+	return (node->s_cmd.ridx += expand_line(&node->s_cmd.rdrs[node->s_cmd.ridx],
+			tk->value, (bool[]){1, 1}, MAX_REDIRECTIONS - node->s_cmd.ridx), 0);
 }
 
-static t_tree *parse_command(t_tree *node, t_list **tokens)
+static t_tree	*parse_command(t_tree *node, t_list **tokens)
 {
-	t_token *token;
-	char *str;
+	t_token	*token;
 
 	if (!node)
 		return (ft_putendl_fd(MALLOC_FAILED, 2), NULL);
@@ -96,14 +83,9 @@ static t_tree *parse_command(t_tree *node, t_list **tokens)
 	{
 		token = (t_token *)(*tokens)->content;
 		if (token->type == WORD || token->type == SQTS || token->type == DQTS)
-		{
-			str = expand_line(token->value, true, true);
-			while (str && str[0])
-			{
-				node->s_command.redirections[node->s_command.ridx++].file = str;
-				str = expand_line(NULL, true, true);
-			}
-		}
+			node->s_cmd.aidx += expand_line(&node->s_cmd.args[node->s_cmd.aidx],
+					token->value, (bool[]){true, true}, MAX_ARGS
+					- node->s_cmd.aidx);
 		else if (parse_redirection(node, tokens))
 			return (free(node), NULL);
 		*tokens = (*tokens)->next;
@@ -111,10 +93,10 @@ static t_tree *parse_command(t_tree *node, t_list **tokens)
 	return (node->type = COMMAND_NODE, node);
 }
 
-t_tree *parse_pipeline(t_list *tokens)
+t_tree	*parse_pipeline(t_list *tokens)
 {
-	t_tree *right;
-	t_tree *left;
+	t_tree	*right;
+	t_tree	*left;
 
 	left = parse_command((t_tree *)malloc(sizeof(t_tree)), &tokens);
 	while (tokens && ((t_token *)tokens->content)->type == PIPE)
@@ -127,9 +109,10 @@ t_tree *parse_pipeline(t_list *tokens)
 		tokens = tokens->next;
 		right->type = OPERATOR_NODE;
 		right->s_operator.left = left;
-		right->s_operator.right = parse_command(
-			(t_tree *)malloc(sizeof(t_tree)), &tokens);
-		if (right->s_operator.left == NULL || right->s_operator.right == NULL || ft_strlen(right->s_operator.value) > 2)
+		right->s_operator.right = parse_command((t_tree *)malloc(sizeof(t_tree)),
+				&tokens);
+		if (right->s_operator.left == NULL || right->s_operator.right == NULL
+			|| ft_strlen(right->s_operator.value) > 2)
 			return (ft_putendl_fd(PIPE_INVALID, 2), clear_tree(right), NULL);
 		left = right;
 	}

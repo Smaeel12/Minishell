@@ -12,7 +12,7 @@
 
 #include "../include/main.h"
 
-void sigint_handler(int segnum)
+void	sigint_handler(int segnum)
 {
 	(void)segnum;
 	ft_putchar_fd('\n', STDOUT_FILENO);
@@ -21,9 +21,9 @@ void sigint_handler(int segnum)
 	rl_redisplay();
 }
 
-int init_signals(void)
+int	init_signals(void)
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	sa.sa_handler = SIG_IGN;
 	sigemptyset(&sa.sa_mask);

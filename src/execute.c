@@ -6,13 +6,13 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/06/26 17:24:02 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/01 03:18:48 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int execute_builtin_command(t_cmd *cmd, char **args, int *streams)
+int	execute_builtin_command(t_cmd *cmd, char **args, int *streams)
 {
 	free(cmd->path);
 	if (streams[IN] == -1 || streams[OUT] == -1)
@@ -20,9 +20,9 @@ int execute_builtin_command(t_cmd *cmd, char **args, int *streams)
 	return (g_data.exit_status = cmd->func(args), 0);
 }
 
-int execute_command(t_cmd *cmd, char **args, int *streams)
+int	execute_command(t_cmd *cmd, char **args, int *streams)
 {
-	pid_t pid;
+	pid_t	pid;
 
 	pid = fork();
 	if (pid == 0)
@@ -49,10 +49,10 @@ int execute_command(t_cmd *cmd, char **args, int *streams)
 	return (free(cmd->path), 1);
 }
 
-int execute_pipeline(t_tree *tree, int *streams)
+int	execute_pipeline(t_tree *tree, int *streams)
 {
-	int pipefds[2];
-	t_cmd cmd;
+	int		pipefds[2];
+	t_cmd	cmd;
 
 	if (!tree)
 		return (0);
@@ -60,24 +60,21 @@ int execute_pipeline(t_tree *tree, int *streams)
 	{
 		if (pipe(pipefds) == -1)
 			return (ft_putendl_fd(CREATE_PIPE_ERROR, 2), 1);
-		execute_pipeline(tree->s_operator.left,
-						 (int[]){streams[IN], pipefds[OUT], pipefds[IN]});
-		execute_pipeline(tree->s_operator.right,
-						 (int[]){pipefds[IN], streams[OUT], pipefds[OUT]});
+		execute_pipeline(tree->s_operator.left, (int[]){streams[IN],
+			pipefds[OUT], pipefds[IN]});
+		execute_pipeline(tree->s_operator.right, (int[]){pipefds[IN],
+			streams[OUT], pipefds[OUT]});
 		return (0);
 	}
-	if (open_heredocs(tree->s_command.heredocs, tree->s_command.hidx) == -1)
+	if (open_heredocs(tree->s_cmd.heredocs, tree->s_cmd.hidx) == -1
+		|| open_redirections(tree->s_cmd.rdrs, tree->s_cmd.ridx, streams) == -1)
 		return (-1);
-	if (open_redirections(tree->s_command.redirections,
-						  tree->s_command.ridx, streams) == -1)
-		return (-1);
-	if (!tree->s_command.arguments[0])
+	if (!tree->s_cmd.args[0])
 		return (0);
-	cmd = (t_cmd){ft_strdup(tree->s_command.arguments[0]), NULL};
-	find_command(&cmd);
-	if (cmd.func && streams[UNUSED] == -1)
-		execute_builtin_command(&cmd, tree->s_command.arguments, streams);
+	cmd = (t_cmd){ft_strdup(tree->s_cmd.args[0]), NULL};
+	if (find_command(&cmd) && cmd.func && streams[UNUSED] == -1)
+		execute_builtin_command(&cmd, tree->s_cmd.args, streams);
 	else
-		execute_command(&cmd, tree->s_command.arguments, streams);
-	return (close(streams[IN]), close(streams[OUT]));
+		execute_command(&cmd, tree->s_cmd.args, streams);
+	return (close(streams[IN]), close(streams[OUT]), 0);
 }

@@ -12,16 +12,16 @@
 
 #include "../include/main.h"
 
-void print_err(char *cmd, char *arg, char *msg)
+void	print_err(char *cmd, char *arg, char *msg)
 {
 	ft_putstr_fd(cmd, 2);
 	ft_putstr_fd(arg, 2);
 	ft_putendl_fd(msg, 2);
 }
 
-int ft_unset(char **argv)
+int	ft_unset(char **argv)
 {
-	int i;
+	int	i;
 
 	i = 1;
 	while (argv[i])
@@ -29,9 +29,9 @@ int ft_unset(char **argv)
 	return (0);
 }
 
-int ft_export_check(char *arg)
+int	ft_export_check(char *arg)
 {
-	int i;
+	int	i;
 
 	i = 1;
 	if (!ft_isalpha(arg[0]) && !(arg[0] == '_'))
@@ -42,11 +42,11 @@ int ft_export_check(char *arg)
 	return (0);
 }
 
-int ft_export(char **argv)
+int	ft_export(char **argv)
 {
-	int i;
-	int j;
-	int check;
+	int	i;
+	int	j;
+	int	check;
 
 	i = 0;
 	j = 0;
