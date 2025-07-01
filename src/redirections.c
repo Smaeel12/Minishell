@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 17:00:29 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 03:55:30 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/01 21:11:53 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,35 +40,36 @@ static int open_heredoc(char *delim, bool mode)
 	return (0);
 }
 
+void heredoc_sigint(int signum)
+{
+	(void)signum;
+	unlink(HEREDOC_FILE);
+	ft_putchar_fd('\n', STDOUT_FILENO);
+	clean_exit(130);
+}
+
 int open_heredocs(struct s_heredoc *heredocs, size_t size)
 {
-	int status;
 	pid_t pid;
-	size_t i;
+	int status;
+	int i;
 
-	i = 0;
+	i = -1;
 	pid = fork();
+	if (pid < 0)
+		return (ft_putendl_fd(FORK_FAILED, 2), -1);
 	if (pid == 0)
 	{
-		signal(SIGINT, clean_exit);
-		while (i < size)
-		{
+		signal(SIGINT, heredoc_sigint);
+		while (++i < (int)size)
 			open_heredoc(heredocs[i].delim, heredocs[i].mode);
-			i++;
-		}
 		clean_exit(0);
 	}
-	if (pid < 0)
-		ft_putendl_fd(FORK_FAILED, 2);
-	wait(&status);
+	waitpid(pid, &status, 0);
 	g_data.exit_status = WEXITSTATUS(status);
+	printf("%i\n", WIFSIGNALED(status));
 	if (WIFSIGNALED(status))
-	{
-		g_data.exit_status = WTERMSIG(status) + 128;
-		unlink(HEREDOC_FILE);
-		printf("\n");
-		return (-1);
-	}
+		return (g_data.exit_status = WTERMSIG(status) + 128, -1);
 	return (0);
 }
 
