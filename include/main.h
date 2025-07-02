@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 01:27:19 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 01:15:36 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,13 +139,14 @@ int							expand_line(char **result, char *line, bool modes[],
 int							tokenize_cmdline(t_list **lst, char *line);
 t_tree						*parse_pipeline(t_list *tokens);
 
-int							execute_pipeline(t_tree *tree, int *streams);
+int							execute_pipeline(t_tree *tree, int *streams,
+								t_cmd *builtins);
 
 int							set_env(char *new_var);
 int							unset_env(char *key);
 char						*get_env(char *key);
 int							print_env(void);
-int							init_env(void);
+t_cmd						*init_env(void);
 
 void						clean_exit(int status);
 void						clear_token(void *arg);
@@ -156,7 +157,7 @@ int							add_token(t_list **lst, enum e_type state,
 								char *line, size_t idx);
 
 int							wait_processes(void);
-int							find_command(t_cmd *cmd);
+int							find_command(t_cmd *cmd, t_cmd *builtins);
 int							check_command(char *path);
 char						*create_path_line(char *env_path, char *cmd,
 								size_t cmd_len);

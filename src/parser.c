@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 03:03:50 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 01:30:11 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,8 +61,8 @@ static int	parse_redirection(t_tree *node, t_list **tokens)
 		return (node->s_cmd.ridx
 			+= expand_line(&node->s_cmd.rdrs[node->s_cmd.ridx], tk->value,
 				(bool[]){false, true}, MAX_REDIRECTIONS - node->s_cmd.ridx),
-			node->s_cmd.heredocs[node->s_cmd.hidx++].delim = (node->s_cmd.rdrs[node->s_cmd.ridx
-				- 1]), 0);
+			node->s_cmd.heredocs[node->s_cmd.hidx++].delim = (
+				node->s_cmd.rdrs[node->s_cmd.ridx - 1]), 0);
 	}
 	else if (!tk || !(tk->type == WORD || tk->type == SQTS || tk->type == DQTS))
 		return (ft_putendl_fd(MISSING_FILENAME, 2), 1);
@@ -109,8 +109,8 @@ t_tree	*parse_pipeline(t_list *tokens)
 		tokens = tokens->next;
 		right->type = OPERATOR_NODE;
 		right->s_operator.left = left;
-		right->s_operator.right = parse_command((t_tree *)malloc(sizeof(t_tree)),
-				&tokens);
+		right->s_operator.right = parse_command(
+				(t_tree *)malloc(sizeof(t_tree)), &tokens);
 		if (right->s_operator.left == NULL || right->s_operator.right == NULL
 			|| ft_strlen(right->s_operator.value) > 2)
 			return (ft_putendl_fd(PIPE_INVALID, 2), clear_tree(right), NULL);

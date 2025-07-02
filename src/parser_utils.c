@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 03:06:37 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 01:30:44 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,8 +67,8 @@ int	should_continue(enum e_type state, bool modes[], char *line, size_t i)
 
 int	expand_line(char **result, char *line, bool modes[], size_t max)
 {
-	char(st) = line[0];
-	size_t(i) = 0, (beg) = 0, (idx) = 0;
+	char (st) = line[0];
+	size_t (i) = 0, (beg) = 0, (idx) = 0;
 	while (line[i++])
 	{
 		if (should_continue(st, modes, line, i))

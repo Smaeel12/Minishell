@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:50:42 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 03:10:49 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 01:26:41 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,12 +97,15 @@ int	print_env(void)
 	return (0);
 }
 
-int	init_env(void)
+t_cmd	*init_env(void)
 {
 	extern char	**environ;
 	size_t		size;
 	size_t		i;
 
+	static t_cmd (builtins)[] = {{"echo", ft_echo}, {"cd", ft_cd}, {"pwd",
+		ft_pwd}, {"export", ft_export}, {"unset", ft_unset}, {"env", ft_env},
+	{"exit", ft_exit}, {NULL, NULL}};
 	i = 0;
 	size = 0;
 	while (environ[size++])
@@ -117,5 +120,5 @@ int	init_env(void)
 		i++;
 	}
 	g_data.ifs = " \t\n";
-	return (0);
+	return (builtins);
 }

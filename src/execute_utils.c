@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/17 01:00:00 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 03:17:45 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 01:14:16 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -62,17 +62,13 @@ int	check_command(char *path)
 	return (0);
 }
 
-int	find_command(t_cmd *cmd)
+int	find_command(t_cmd *cmd, t_cmd *builtins)
 {
-	t_cmd	*builtins;
 	size_t	path_len;
 	size_t	cmd_len;
 	char	*path;
 	int		i;
 
-	builtins = (t_cmd[]){{"echo", ft_echo}, {"cd", ft_cd}, {"pwd", ft_pwd},
-		{"export", ft_export}, {"unset", ft_unset}, {"env", ft_env}, {"exit",
-		ft_exit}, {NULL, NULL}};
 	if (cmd->path[0] == '/' || !ft_strncmp(cmd->path, "./", 2))
 		return (1);
 	i = -1;
