@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 01:30:11 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 01:47:19 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -55,7 +55,7 @@ static int	parse_redirection(t_tree *node, t_list **tokens)
 	tk = (t_token *)(*tokens)->content;
 	if (node->s_cmd.rdrs[node->s_cmd.ridx - 1][0] == '<' && len == 2)
 	{
-		node->s_cmd.heredocs[node->s_cmd.hidx].mode = tk->type;
+		node->s_cmd.heredocs[node->s_cmd.hidx].mode = (tk->type == WORD);
 		if (!tk || !(tk->type == WORD || tk->type == SQTS || tk->type == DQTS))
 			return (ft_putendl_fd(MISSING_DELIM, 2), 1);
 		return (node->s_cmd.ridx
