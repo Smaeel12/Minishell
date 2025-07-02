@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 04:22:53 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 22:48:59 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ int	main(void)
 	t_cmd	*builtins;
 	char	*line;
 
-	builtins = init_env();
+	builtins = init_shell();
 	while (true)
 	{
 		init_signals();

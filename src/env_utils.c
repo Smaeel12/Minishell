@@ -6,25 +6,27 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:50:42 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 04:22:28 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 23:05:35 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	unset_env(char *key)
+int unset_env(char *key)
 {
-	size_t	key_len;
-	size_t	i;
+	size_t key_len;
+	size_t i;
 
 	i = 0;
 	key_len = ft_strlen(key);
 	while (g_data.environs[i])
 	{
-		if (!ft_strncmp(g_data.environs[i], key, key_len)
-			&& (!g_data.environs[i][key_len]
-			|| g_data.environs[i][key_len] == '='))
+		if (!ft_strncmp(g_data.environs[i], key, key_len) && (!g_data.environs[i][key_len] || g_data.environs[i][key_len] == '='))
 		{
+			if (!ft_strncmp(key, "IFS", 5))
+				init_ifs(NULL);
+			if (!ft_strncmp(key, "PATH", 5))
+				init_paths(NULL);
 			free(g_data.environs[i]);
 			while (g_data.environs[++i])
 				g_data.environs[i - 1] = g_data.environs[i];
@@ -37,55 +39,51 @@ int	unset_env(char *key)
 	return (0);
 }
 
-int	set_env(char *new_var)
+int set_env(char *new_var)
 {
-	char	**new_array;
-	size_t	key_len;
-	char	*key;
-	int		i;
+	size_t key_len;
+	char *key;
+	int i;
 
 	i = -1;
 	key_len = ft_strchr(new_var, '=') - new_var;
 	key = ft_substr(new_var, 0, key_len);
 	while (g_data.environs[++i] && !(!ft_strncmp(g_data.environs[i], key,
-				key_len) && (!g_data.environs[i][key_len]
-			|| g_data.environs[i][key_len] == '=')))
+												key_len) &&
+			(!g_data.environs[i][key_len] || g_data.environs[i][key_len] == '=')))
 		;
+	if (!ft_strncmp(key, "IFS", 5))
+		init_ifs(ft_substr(new_var, key_len, ft_strlen(new_var) - key_len));
+	if (!ft_strncmp(key, "PATH", 5))
+		init_paths(ft_substr(new_var, key_len, ft_strlen(new_var) - key_len));
 	free(key);
 	if (g_data.environs[i])
 		return (free(g_data.environs[i]), g_data.environs[i] = new_var, 0);
-	i = -1;
-	new_array = malloc((g_data.env_size + 2) * sizeof(char *));
-	ft_bzero(new_array, (g_data.env_size + 2) * sizeof(char *));
-	while (g_data.environs[++i])
-		new_array[i] = g_data.environs[i];
-	new_array[i] = new_var;
+	init_env(g_data.environs, (g_data.env_size + 1));
+	g_data.environs[g_data.env_size] = new_var;
 	g_data.env_size += 1;
-	free(g_data.environs);
-	g_data.environs = new_array;
 	return (0);
 }
 
-char	*get_env(char *key)
+char *get_env(char *key)
 {
-	size_t	key_len;
-	size_t	i;
+	size_t key_len;
+	size_t i;
 
 	i = 0;
 	key_len = ft_strlen(key);
 	if (key[i] == '?')
 		return (free(key), ft_itoa(g_data.st_exit));
-	while (g_data.environs[i] && !(!ft_strncmp(g_data.environs[i], key, key_len)
-			&& g_data.environs[i][key_len] == '='))
+	while (g_data.environs[i] && !(!ft_strncmp(g_data.environs[i], key, key_len) && g_data.environs[i][key_len] == '='))
 		i++;
 	if (g_data.environs[i])
 		return (free(key), ft_strdup(&g_data.environs[i][key_len + 1]));
 	return (free(key), NULL);
 }
 
-int	print_env(void)
+int print_env(void)
 {
-	size_t	i;
+	size_t i;
 
 	i = 0;
 	while (g_data.environs && g_data.environs[i])
@@ -95,30 +93,4 @@ int	print_env(void)
 		i++;
 	}
 	return (0);
-}
-
-t_cmd	*init_env(void)
-{
-	extern char	**environ;
-	size_t		size;
-	size_t		i;
-
-	static t_cmd (builtins)[] = {{"echo", ft_echo}, {"cd", ft_cd}, {"pwd",
-		ft_pwd}, {"export", ft_export}, {"unset", ft_unset}, {"env", ft_env},
-	{"exit", ft_exit}, {NULL, NULL}};
-	i = 0;
-	size = 0;
-	while (environ[size++])
-		;
-	g_data.env_size = size;
-	g_data.paths = ft_split(getenv("PATH"), ':');
-	g_data.environs = malloc((size + 1) * sizeof(char *));
-	ft_bzero(g_data.environs, size * sizeof(char *));
-	while (g_data.environs && environ[i])
-	{
-		g_data.environs[i] = ft_strdup(environ[i]);
-		i++;
-	}
-	g_data.ifs = " \t\n";
-	return (builtins);
 }

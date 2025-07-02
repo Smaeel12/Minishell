@@ -6,13 +6,20 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 04:21:24 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 23:50:53 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int	execute_builtin_command(t_cmd *cmd, char **args, int *streams)
+void sigpipe_handler(int signum)
+{
+	(void)signum;
+	printf("SIGPIPE caught\n");
+	// Don't exit immediately, let the program handle it
+}
+
+int execute_builtin_command(t_cmd *cmd, char **args, int *streams)
 {
 	free(cmd->path);
 	if (streams[IN] == -1 || streams[OUT] == -1)
@@ -20,9 +27,9 @@ int	execute_builtin_command(t_cmd *cmd, char **args, int *streams)
 	return (g_data.st_exit = cmd->func(args), 0);
 }
 
-int	execute_command(t_cmd *cmd, char **args, int *streams)
+int execute_command(t_cmd *cmd, char **args, int *streams)
 {
-	pid_t	pid;
+	pid_t pid;
 
 	pid = fork();
 	if (pid == 0)
@@ -49,10 +56,10 @@ int	execute_command(t_cmd *cmd, char **args, int *streams)
 	return (free(cmd->path), 1);
 }
 
-int	execute_pipeline(t_tree *tree, int *streams, t_cmd *builtins)
+int execute_pipeline(t_tree *tree, int *streams, t_cmd *builtins)
 {
-	int		pipefds[2];
-	t_cmd	cmd;
+	int pipefds[2];
+	t_cmd cmd;
 
 	if (!tree)
 		return (0);
@@ -60,15 +67,11 @@ int	execute_pipeline(t_tree *tree, int *streams, t_cmd *builtins)
 	{
 		if (pipe(pipefds) == -1)
 			return (ft_putendl_fd(CREATE_PIPE_ERROR, 2), 1);
-		execute_pipeline(tree->s_operator.left, (int []){streams[IN],
-			pipefds[OUT], pipefds[IN]}, builtins);
-		execute_pipeline(tree->s_operator.right, (int []){pipefds[IN],
-			streams[OUT], pipefds[OUT]}, builtins);
+		execute_pipeline(tree->s_operator.left, (int[]){streams[IN], pipefds[OUT], pipefds[IN]}, builtins);
+		execute_pipeline(tree->s_operator.right, (int[]){pipefds[IN], streams[OUT], pipefds[OUT]}, builtins);
 		return (0);
 	}
-	if (open_heredocs(tree->s_cmd.heredocs, tree->s_cmd.hidx) == -1
-		|| open_redirections(tree->s_cmd.rdrs, tree->s_cmd.ridx, streams) == -1
-		|| !tree->s_cmd.args[0])
+	if (open_heredocs(tree->s_cmd.heredocs, tree->s_cmd.hidx) == -1 || open_redirections(tree->s_cmd.rdrs, tree->s_cmd.ridx, streams) == -1 || !tree->s_cmd.args[0])
 		return (1);
 	cmd = (t_cmd){ft_strdup(tree->s_cmd.args[0]), NULL};
 	if (find_command(&cmd, builtins) && cmd.func && streams[UNUSED] == -1)
