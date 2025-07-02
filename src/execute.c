@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 01:28:51 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 04:21:24 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,8 +16,8 @@ int	execute_builtin_command(t_cmd *cmd, char **args, int *streams)
 {
 	free(cmd->path);
 	if (streams[IN] == -1 || streams[OUT] == -1)
-		return (g_data.exit_status = 1, 0);
-	return (g_data.exit_status = cmd->func(args), 0);
+		return (g_data.st_exit = 1, 0);
+	return (g_data.st_exit = cmd->func(args), 0);
 }
 
 int	execute_command(t_cmd *cmd, char **args, int *streams)
@@ -60,10 +60,10 @@ int	execute_pipeline(t_tree *tree, int *streams, t_cmd *builtins)
 	{
 		if (pipe(pipefds) == -1)
 			return (ft_putendl_fd(CREATE_PIPE_ERROR, 2), 1);
-		execute_pipeline(tree->s_operator.left,
-			(int []){streams[IN], pipefds[OUT], pipefds[IN]}, builtins);
-		execute_pipeline(tree->s_operator.right,
-			(int []){pipefds[IN], streams[OUT], pipefds[OUT]}, builtins);
+		execute_pipeline(tree->s_operator.left, (int []){streams[IN],
+			pipefds[OUT], pipefds[IN]}, builtins);
+		execute_pipeline(tree->s_operator.right, (int []){pipefds[IN],
+			streams[OUT], pipefds[OUT]}, builtins);
 		return (0);
 	}
 	if (open_heredocs(tree->s_cmd.heredocs, tree->s_cmd.hidx) == -1

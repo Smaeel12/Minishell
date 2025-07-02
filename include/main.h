@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 01:15:36 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 03:59:22 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -126,7 +126,7 @@ struct						s_global_data
 	char					**paths;
 	t_list					*tokens;
 	char					**environs;
-	int						exit_status;
+	int						st_exit;
 	size_t					env_size;
 	char					*ifs;
 };

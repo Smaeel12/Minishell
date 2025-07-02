@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 17:00:29 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/01 22:41:53 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 03:59:22 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,8 +66,8 @@ int	open_heredocs(struct s_heredoc *heredocs, size_t size)
 		clean_exit(0);
 	}
 	waitpid(pid, &status, 0);
-	g_data.exit_status = WEXITSTATUS(status);
-	if (g_data.exit_status == 130 || g_data.exit_status == 141)
+	g_data.st_exit = WEXITSTATUS(status);
+	if (g_data.st_exit == 130 || g_data.st_exit == 141)
 		return (-1);
 	return (0);
 }
@@ -94,9 +94,9 @@ int	open_redirections(char **rdrs, size_t size, int *fds)
 		if (rdrs[i][0] == '>' && len == 2)
 			fds[OUT] = open(rdrs[++i], O_APPEND | O_WRONLY | O_CREAT, 0644);
 		if (fds[OUT] == -1)
-			return (perror(rdrs[i]), close(fds[IN]), -1);
+			return (perror(rdrs[i]), close(fds[IN]), g_data.st_exit = 1, -1);
 		if (fds[IN] == -1)
-			return (perror(rdrs[i]), close(fds[OUT]), -1);
+			return (perror(rdrs[i]), close(fds[OUT]), g_data.st_exit = 1, -1);
 	}
 	return (0);
 }

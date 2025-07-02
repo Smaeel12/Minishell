@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 15:53:44 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 01:31:20 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/02 04:22:53 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,7 +28,7 @@ int	main(void)
 			break ;
 		rl_on_new_line();
 		add_history(line);
-		g_data.exit_status |= tokenize_cmdline(&g_data.tokens, line);
+		g_data.st_exit |= tokenize_cmdline(&g_data.tokens, line);
 		g_data.tree = parse_pipeline(g_data.tokens);
 		signal(SIGINT, SIG_IGN);
 		execute_pipeline(g_data.tree,
