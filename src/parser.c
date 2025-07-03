@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/16 10:00:32 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 03:33:03 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 04:14:11 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,38 +40,45 @@ int tokenize_cmdline(t_list **lst, char *line)
 	return (0);
 }
 
-static int parse_redirection(t_tree *node, t_list **tokens)
+static int parse_heredoc(t_tree *node, t_token *token)
 {
-	t_token *tk;
+	node->s_cmd.heredocs[node->s_cmd.hidx].mode = (token->type == WORD);
+	if (!token || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
+		return (ft_putendl_fd(MISSING_DELIM, 2), 1);
+	node->s_cmd.ridx += expand_line(&node->s_cmd.rdrs[node->s_cmd.ridx],
+									token->value, (bool[]){false, true}, MAX_REDIRECTIONS - node->s_cmd.ridx);
+	node->s_cmd.heredocs[node->s_cmd.hidx++].delim = (node->s_cmd.rdrs[node->s_cmd.ridx - 1]);
+	return (0);
+}
+
+static int parse_redirection(t_tree *node, t_list **tokens, int *error)
+{
+	t_token *token;
 	size_t len;
 
 	if (node->s_cmd.ridx + 1 >= MAX_REDIRECTIONS)
 		return (*tokens = (*tokens)->next, 0);
-	tk = (t_token *)(*tokens)->content;
-	len = ft_strlen(tk->value);
+	token = (t_token *)(*tokens)->content;
+	len = ft_strlen(token->value);
 	if (len > 2)
 		return (ft_putendl_fd(RDR_INVALID, 2), 1);
-	node->s_cmd.rdrs[node->s_cmd.ridx++] = ft_strdup(tk->value);
+	node->s_cmd.rdrs[node->s_cmd.ridx++] = ft_strdup(token->value);
 	*tokens = (*tokens)->next;
-	tk = (t_token *)(*tokens)->content;
-	if (node->s_cmd.hidx < MAX_REDIRECTIONS &&
-		node->s_cmd.rdrs[node->s_cmd.ridx - 1][0] == '<' && len == 2)
+	token = (t_token *)(*tokens)->content;
+	if (node->s_cmd.rdrs[node->s_cmd.ridx - 1][0] == '<' && len == 2)
 	{
-		node->s_cmd.heredocs[node->s_cmd.hidx].mode = (tk->type == WORD);
-		if (!tk || !(tk->type == WORD || tk->type == SQTS || tk->type == DQTS))
-			return (ft_putendl_fd(MISSING_DELIM, 2), 1);
-		return (node->s_cmd.ridx += expand_line(&node->s_cmd.rdrs[node->s_cmd.ridx], tk->value,
-												(bool[]){false, true}, MAX_REDIRECTIONS - node->s_cmd.ridx),
-				node->s_cmd.heredocs[node->s_cmd.hidx++].delim = (node->s_cmd.rdrs[node->s_cmd.ridx - 1]), 0);
+		if (node->s_cmd.hidx >= MAX_HEREDOCS)
+			return (ft_putendl_fd(MAX_HEREDOCS_ERROR, 2), *error = 2, 1);
+		return (parse_heredoc(node, token), 0);
 	}
-	else if (!tk || !(tk->type == WORD || tk->type == SQTS || tk->type == DQTS))
-		return (ft_putendl_fd(MISSING_FILENAME, 2), 1);
-	return (node->s_cmd.ridx += expand_line(&node->s_cmd.rdrs[node->s_cmd.ridx],
-											tk->value, (bool[]){1, 1}, MAX_REDIRECTIONS - node->s_cmd.ridx),
-			0);
+	else if (!token || !(token->type == WORD || token->type == SQTS || token->type == DQTS))
+		return (ft_putendl_fd(MISSING_FILENAME, 2), *error = 1, 1);
+	node->s_cmd.ridx += expand_line(&node->s_cmd.rdrs[node->s_cmd.ridx],
+									token->value, (bool[]){true, true}, MAX_REDIRECTIONS - node->s_cmd.ridx);
+	return (0);
 }
 
-static t_tree *parse_command(t_tree *node, t_list **tokens)
+static t_tree *parse_command(t_tree *node, t_list **tokens, int *error)
 {
 	t_token *token;
 
@@ -86,21 +93,22 @@ static t_tree *parse_command(t_tree *node, t_list **tokens)
 		if (token->type == WORD || token->type == SQTS || token->type == DQTS)
 		{
 			if (node->s_cmd.aidx + 1 < MAX_ARGS)
-				node->s_cmd.aidx += expand_line(&node->s_cmd.args[node->s_cmd.aidx], token->value, (bool[]){true, true}, MAX_ARGS - node->s_cmd.aidx);
+				node->s_cmd.aidx += expand_line(&node->s_cmd.args[node->s_cmd.aidx],
+												token->value, (bool[]){true, true}, MAX_ARGS - node->s_cmd.aidx);
 		}
-		else if (parse_redirection(node, tokens))
+		else if (parse_redirection(node, tokens, error))
 			return (free(node), NULL);
 		*tokens = (*tokens)->next;
 	}
 	return (node->type = COMMAND_NODE, node);
 }
 
-t_tree *parse_pipeline(t_list *tokens)
+t_tree *parse_pipeline(t_list *tokens, int *error)
 {
 	t_tree *right;
 	t_tree *left;
 
-	left = parse_command((t_tree *)malloc(sizeof(t_tree)), &tokens);
+	left = parse_command((t_tree *)malloc(sizeof(t_tree)), &tokens, error);
 	while (tokens && ((t_token *)tokens->content)->type == PIPE)
 	{
 		right = (t_tree *)malloc(sizeof(t_tree));
@@ -111,10 +119,10 @@ t_tree *parse_pipeline(t_list *tokens)
 		tokens = tokens->next;
 		right->type = OPERATOR_NODE;
 		right->s_operator.left = left;
-		right->s_operator.right = parse_command(
-			(t_tree *)malloc(sizeof(t_tree)), &tokens);
+		right->s_operator.right = parse_command((t_tree *)malloc(sizeof(t_tree)),
+												&tokens, error);
 		if (right->s_operator.left == NULL || right->s_operator.right == NULL || ft_strlen(right->s_operator.value) > 2)
-			return (ft_putendl_fd(PIPE_INVALID, 2), clear_tree(right), NULL);
+			return (ft_putendl_fd(PIPE_INVALID, 2), clear_tree(right), *error = 1, NULL);
 		left = right;
 	}
 	return (left);

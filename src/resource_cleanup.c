@@ -12,7 +12,7 @@
 
 #include "../include/main.h"
 
-void clean_exit(int status)
+void	clean_exit(int status)
 {
 	clear_tree(g_data.tree);
 	clear_array(g_data.paths);
@@ -21,19 +21,19 @@ void clean_exit(int status)
 	exit(status);
 }
 
-void clear_token(void *arg)
+void	clear_token(void *arg)
 {
-	t_token *token;
+	t_token	*token;
 
 	token = arg;
 	free(token->value);
 	free(token);
 }
 
-int clear_tree(t_tree *tree)
+int	clear_tree(t_tree *tree)
 {
-	size_t i;
-	size_t j;
+	size_t	i;
+	size_t	j;
 
 	i = 0;
 	j = 0;
@@ -54,9 +54,9 @@ int clear_tree(t_tree *tree)
 	return (0);
 }
 
-int clear_array(char **array)
+int	clear_array(char **array)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (array && array[i])

@@ -60,9 +60,9 @@ int	execute_pipeline(t_tree *tree, int *streams, t_cmd *builtins)
 	{
 		if (pipe(pipefds) == -1)
 			return (ft_putendl_fd(CREATE_PIPE_ERROR, 2), 1);
-		execute_pipeline(tree->s_operator.left, (int []){streams[IN],
+		execute_pipeline(tree->s_operator.left, (int[]){streams[IN],
 			pipefds[OUT], pipefds[IN]}, builtins);
-		execute_pipeline(tree->s_operator.right, (int []){pipefds[IN],
+		execute_pipeline(tree->s_operator.right, (int[]){pipefds[IN],
 			streams[OUT], pipefds[OUT]}, builtins);
 		return (0);
 	}

@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 03:33:50 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 04:07:32 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,18 +33,19 @@
 #define NO_CMD ": command not found"
 #define DIR_CMD ": Is a directory"
 
+#define MAX_HEREDOCS_ERROR "maximum here-document count exceeded"
 #define MISSING_DELIM "Syntax error: Missing here_doc delimiter"
 #define MISSING_FILENAME "Syntax error: Missing filename"
 #define UNCLOS_QUOTES "Syntax error: Unclosed quotes"
 #define RDR_INVALID "Syntax error: Invalid redirection"
 #define PIPE_INVALID "Syntax error: Invalid pipe"
-
 #define CREATE_PIPE_ERROR "Can't create a pipe"
 #define MALLOC_FAILED "Memory allocation failed"
 #define FORK_FAILED "Creating a child failed"
 
 #define TOKEN_CHARSET " \t\"'|<>"
 #define MAX_REDIRECTIONS 512
+#define MAX_HEREDOCS 17
 #define MAX_ARGS 512
 
 /** ENUMS **/
@@ -137,7 +138,7 @@ int expand_line(char **result, char *line, bool modes[],
 				size_t max);
 
 int tokenize_cmdline(t_list **lst, char *line);
-t_tree *parse_pipeline(t_list *tokens);
+t_tree *parse_pipeline(t_list *tokens, int *error);
 
 int execute_pipeline(t_tree *tree, int *streams,
 					 t_cmd *builtins);
