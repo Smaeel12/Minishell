@@ -6,20 +6,20 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 22:15:11 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 01:32:00 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 02:10:10 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int init_paths(char *path_line)
+int	init_paths(char *path_line)
 {
 	clear_array(g_data.paths);
 	g_data.paths = ft_split(path_line, ':');
 	return (free(path_line), 0);
 }
 
-int init_ifs(char *ifs)
+int	init_ifs(char *ifs)
 {
 	free(g_data.ifs);
 	g_data.ifs = ifs;
@@ -28,10 +28,10 @@ int init_ifs(char *ifs)
 	return (0);
 }
 
-int init_env(char **environs, size_t size)
+int	init_env(char **environs, size_t size)
 {
-	char **new_array;
-	size_t i;
+	char	**new_array;
+	size_t	i;
 
 	i = 0;
 	new_array = malloc((size + 1) * sizeof(char *));
@@ -47,11 +47,11 @@ int init_env(char **environs, size_t size)
 	return (0);
 }
 
-t_cmd *init_shell(void)
+t_cmd	*init_shell(void)
 {
-	extern char **environ;
-	size_t size;
-	size_t i;
+	extern char	**environ;
+	size_t		size;
+	size_t		i;
 
 	i = 0;
 	size = 0;
@@ -67,13 +67,15 @@ t_cmd *init_shell(void)
 	}
 	g_data.env_size = size;
 	init_paths(get_env(ft_strdup("PATH")));
-	static t_cmd(builtins)[] = {{"echo", ft_echo}, {"cd", ft_cd}, {"pwd", ft_pwd}, {"export", ft_export}, {"unset", ft_unset}, {"env", ft_env}, {"exit", ft_exit}, {NULL, NULL}};
+	static t_cmd (builtins)[] = {{"echo", ft_echo}, {"cd", ft_cd}, {"pwd",
+		ft_pwd}, {"export", ft_export}, {"unset", ft_unset}, {"env", ft_env},
+	{"exit", ft_exit}, {NULL, NULL}};
 	return (builtins);
 }
 
-int init_signals(void)
+int	init_signals(void)
 {
-	struct sigaction sa;
+	struct sigaction	sa;
 
 	sa.sa_handler = SIG_IGN;
 	sigemptyset(&sa.sa_mask);

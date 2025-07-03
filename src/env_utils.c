@@ -6,22 +6,24 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:50:42 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 23:05:35 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 02:11:52 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-int unset_env(char *key)
+int	unset_env(char *key)
 {
-	size_t key_len;
-	size_t i;
+	size_t	key_len;
+	size_t	i;
 
 	i = 0;
 	key_len = ft_strlen(key);
 	while (g_data.environs[i])
 	{
-		if (!ft_strncmp(g_data.environs[i], key, key_len) && (!g_data.environs[i][key_len] || g_data.environs[i][key_len] == '='))
+		if (!ft_strncmp(g_data.environs[i], key, key_len)
+			&& (!g_data.environs[i][key_len]
+			|| g_data.environs[i][key_len] == '='))
 		{
 			if (!ft_strncmp(key, "IFS", 5))
 				init_ifs(NULL);
@@ -39,18 +41,18 @@ int unset_env(char *key)
 	return (0);
 }
 
-int set_env(char *new_var)
+int	set_env(char *new_var)
 {
-	size_t key_len;
-	char *key;
-	int i;
+	size_t	key_len;
+	char	*key;
+	int		i;
 
 	i = -1;
 	key_len = ft_strchr(new_var, '=') - new_var;
 	key = ft_substr(new_var, 0, key_len);
 	while (g_data.environs[++i] && !(!ft_strncmp(g_data.environs[i], key,
-												key_len) &&
-			(!g_data.environs[i][key_len] || g_data.environs[i][key_len] == '=')))
+				key_len) && (!g_data.environs[i][key_len]
+			|| g_data.environs[i][key_len] == '=')))
 		;
 	if (!ft_strncmp(key, "IFS", 5))
 		init_ifs(ft_substr(new_var, key_len, ft_strlen(new_var) - key_len));
@@ -65,25 +67,26 @@ int set_env(char *new_var)
 	return (0);
 }
 
-char *get_env(char *key)
+char	*get_env(char *key)
 {
-	size_t key_len;
-	size_t i;
+	size_t	key_len;
+	size_t	i;
 
 	i = 0;
 	key_len = ft_strlen(key);
 	if (key[i] == '?')
 		return (free(key), ft_itoa(g_data.st_exit));
-	while (g_data.environs[i] && !(!ft_strncmp(g_data.environs[i], key, key_len) && g_data.environs[i][key_len] == '='))
+	while (g_data.environs[i] && !(!ft_strncmp(g_data.environs[i], key, key_len)
+			&& g_data.environs[i][key_len] == '='))
 		i++;
 	if (g_data.environs[i])
 		return (free(key), ft_strdup(&g_data.environs[i][key_len + 1]));
 	return (free(key), NULL);
 }
 
-int print_env(void)
+int	print_env(void)
 {
-	size_t i;
+	size_t	i;
 
 	i = 0;
 	while (g_data.environs && g_data.environs[i])

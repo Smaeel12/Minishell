@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 01:34:31 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 03:33:50 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,8 +44,8 @@
 #define FORK_FAILED "Creating a child failed"
 
 #define TOKEN_CHARSET " \t\"'|<>"
-#define MAX_REDIRECTIONS 128
-#define MAX_ARGS 128
+#define MAX_REDIRECTIONS 512
+#define MAX_ARGS 512
 
 /** ENUMS **/
 enum e_node
