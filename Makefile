@@ -2,9 +2,9 @@ CC = cc
 NAME = minishell
 INCLUDE = include/main.h
 CFLAGS = -Wall -Wextra -Werror -g3 #-fsanitize=address
-SRCS = minishell.c $(addprefix src/, parser.c execute.c builtins.c signals.c\
+SRCS = minishell.c $(addprefix src/, parser.c execute.c builtins.c init.c\
 					env_utils.c parser_utils.c execute_utils.c builtins_add.c\
-					resource_cleanup.c redirections.c init.c)
+					resource_cleanup.c redirections.c)
 OBJS = $(SRCS:%.c=objs/%.o)
 
 objs/%.o: %.c

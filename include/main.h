@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 22:50:05 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 01:34:31 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -181,6 +181,8 @@ int init_env(char **environs, size_t size);
 t_cmd *init_shell(void);
 
 void print_err(char *cmd, char *arg, char *msg);
+
+void sigint_handler(int segnum);
 
 static inline enum e_type determine_token(char c)
 {

@@ -6,18 +6,11 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/26 10:02:57 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/02 23:50:53 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 01:33:06 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
-
-void sigpipe_handler(int signum)
-{
-	(void)signum;
-	printf("SIGPIPE caught\n");
-	// Don't exit immediately, let the program handle it
-}
 
 int execute_builtin_command(t_cmd *cmd, char **args, int *streams)
 {

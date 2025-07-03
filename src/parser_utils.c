@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/24 18:09:10 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 00:17:29 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 01:29:49 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,10 +30,11 @@ int add_token(t_list **lst, enum e_type state, char *line, size_t idx)
 int append_string(char **result, char *segment, size_t max, bool ifs_mode)
 {
 	char *(new), *(slice);
-	size_t(rdx) = 0, (i) = 0, (beg) = 0;
+	size_t(len) = 0, (rdx) = 0, (i) = 0, (beg) = 0;
 	if (!segment || !segment[0])
 		return (free(segment), 0);
-	while (segment[i] && rdx < max)
+	len = ft_strlen(segment);
+	while (i < len && rdx < max)
 	{
 		while (segment[i] && (!ifs_mode || !ft_strchr(g_data.ifs, segment[i])))
 			i++;
@@ -61,7 +62,7 @@ int should_continue(enum e_type state, bool modes[], char *line, size_t i)
 		return (0);
 	if (modes[SKIP] && (state == SQTS || state == DQTS) && line[i] == (char)state)
 		return (0);
-	if ((line[i] == SQTS || line[i] == DQTS) && (state != DQTS && state != SQTS))
+	if (modes[SKIP] && (line[i] == SQTS || line[i] == DQTS) && (state != DQTS && state != SQTS))
 		return (0);
 	return (1);
 }
