@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/07/02 22:15:11 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 02:10:10 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 05:40:42 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,9 +67,9 @@ t_cmd	*init_shell(void)
 	}
 	g_data.env_size = size;
 	init_paths(get_env(ft_strdup("PATH")));
-	static t_cmd(builtins)[] = {{"echo", ft_echo}, {"cd", ft_cd}, {"pwd",
+	static t_cmd (builtins)[] = {{"echo", ft_echo}, {"cd", ft_cd}, {"pwd",
 		ft_pwd}, {"export", ft_export}, {"unset", ft_unset}, {"env", ft_env},
-		{"exit", ft_exit}, {NULL, NULL}};
+	{"exit", ft_exit}, {NULL, NULL}};
 	return (builtins);
 }
 

@@ -6,27 +6,25 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/25 17:00:29 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 04:39:13 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 05:39:35 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/main.h"
 
-static int open_heredoc(char *delim, bool mode)
+static int	open_heredoc(char *delim, bool mode, size_t delim_len)
 {
-	size_t delim_len;
-	char *expanded;
-	char *line;
-	int fd;
+	char	*expanded;
+	char	*line;
+	int		fd;
 
-	delim_len = ft_strlen(delim);
 	fd = open(HEREDOC_FILE, O_TRUNC | O_WRONLY | O_CREAT, 0644);
 	while (fd > 0)
 	{
 		expanded = NULL;
 		line = readline("heredoc> ");
 		if (!line || !ft_strncmp(line, delim, delim_len + 1))
-			break;
+			break ;
 		expand_line(&expanded, line, (bool[]){mode, false}, 1);
 		if (expanded)
 			ft_putendl_fd(expanded, fd);
@@ -43,7 +41,7 @@ static int open_heredoc(char *delim, bool mode)
 	return (0);
 }
 
-void heredoc_sigint(int signum)
+void	heredoc_sigint(int signum)
 {
 	(void)signum;
 	unlink(HEREDOC_FILE);
@@ -51,11 +49,11 @@ void heredoc_sigint(int signum)
 	clean_exit(128 + 2);
 }
 
-int open_heredocs(struct s_heredoc *heredocs, size_t size)
+int	open_heredocs(struct s_heredoc *heredocs, size_t size)
 {
-	pid_t pid;
-	int status;
-	int i;
+	pid_t	pid;
+	int		status;
+	int		i;
 
 	i = -1;
 	pid = fork();
@@ -65,7 +63,8 @@ int open_heredocs(struct s_heredoc *heredocs, size_t size)
 	{
 		signal(SIGINT, heredoc_sigint);
 		while (++i < (int)size)
-			open_heredoc(heredocs[i].delim, heredocs[i].mode);
+			open_heredoc(heredocs[i].delim, heredocs[i].mode,
+				ft_strlen(heredocs[i].delim));
 		clean_exit(0);
 	}
 	waitpid(pid, &status, 0);
@@ -75,10 +74,10 @@ int open_heredocs(struct s_heredoc *heredocs, size_t size)
 	return (0);
 }
 
-int open_redirections(char **rdrs, size_t size, int *fds)
+int	open_redirections(char **rdrs, size_t size, int *fds)
 {
-	size_t len;
-	int i;
+	size_t	len;
+	int		i;
 
 	i = -1;
 	while (++i < (int)size && rdrs[i])

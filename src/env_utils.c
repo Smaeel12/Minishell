@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/13 14:50:42 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 02:11:52 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/03 05:44:39 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,7 +23,7 @@ int	unset_env(char *key)
 	{
 		if (!ft_strncmp(g_data.environs[i], key, key_len)
 			&& (!g_data.environs[i][key_len]
-				|| g_data.environs[i][key_len] == '='))
+			|| g_data.environs[i][key_len] == '='))
 		{
 			if (!ft_strncmp(key, "IFS", 5))
 				init_ifs(NULL);
@@ -52,7 +52,7 @@ int	set_env(char *new_var)
 	key = ft_substr(new_var, 0, key_len);
 	while (g_data.environs[++i] && !(!ft_strncmp(g_data.environs[i], key,
 				key_len) && (!g_data.environs[i][key_len]
-				|| g_data.environs[i][key_len] == '=')))
+			|| g_data.environs[i][key_len] == '=')))
 		;
 	if (!ft_strncmp(key, "IFS", 5))
 		init_ifs(ft_substr(new_var, key_len, ft_strlen(new_var) - key_len));
