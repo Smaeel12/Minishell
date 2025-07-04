@@ -6,7 +6,7 @@
 /*   By: iboubkri <iboubkri@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/22 16:03:17 by iboubkri          #+#    #+#             */
-/*   Updated: 2025/07/03 04:07:32 by iboubkri         ###   ########.fr       */
+/*   Updated: 2025/07/04 22:43:06 by iboubkri         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -43,7 +43,7 @@
 # define MALLOC_FAILED "Memory allocation failed"
 # define FORK_FAILED "Creating a child failed"
 
-# define TOKEN_CHARSET " \t\"'|<>"
+# define TOKEN_CHARSET " \t\"'|<>()"
 # define MAX_REDIRECTIONS 512
 # define MAX_HEREDOCS 17
 # define MAX_ARGS 512
@@ -64,15 +64,19 @@ enum						e_type
 	PIPE = '|',
 	DQTS = '"',
 	SQTS = '\'',
+	ANDOP = '&',
 	INRDR = '<',
 	OUTRDR = '>',
+	OPENED = '(',
+	CLOSED = ')',
 };
 
 enum						e_streams
 {
 	IN,
 	OUT,
-	UNUSED,
+	PIPEEND1,
+	PIPEEND2,
 };
 
 enum
@@ -189,7 +193,8 @@ static inline enum e_type	determine_token(char c)
 {
 	if (c == ' ' || c == '\t' || c == '\0')
 		return (NONE);
-	if (c == '<' || c == '>' || c == '|' || c == '\"' || c == '\'')
+	if (c == '<' || c == '>' || c == '|' || c == '\"' || c == '\'' || c == '&'
+		|| c == '(' || c == ')')
 		return (c);
 	return (WORD);
 }
